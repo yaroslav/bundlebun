@@ -1,0 +1,11 @@
+# For available configuration options, see:
+#   https://github.com/standardrb/standard
+ruby_version: 3.0
+
+ignore:
+  - "spec/**/*":
+      - Metrics/BlockLength
+  - "tasks/**/*":
+      - Style/Documentation
+  - "**/*":
+      - Style/StringLiterals

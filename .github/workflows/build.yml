@@ -1,0 +1,229 @@
+name: Build, integration-test and publish the gem
+
+on:
+  push:
+    branches:
+      - main
+
+# on:
+#   workflow_dispatch:
+#   schedule:
+#     - cron: "0 6 * * *"
+
+jobs:
+  # We're only supposed to continue with the build, integration testing and
+  # release if a new Bun version is out.
+  check_version:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.check_version.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - name: Check released Bun version
+        id: check_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if bundle exec rake bundlebun:check_version; then
+            echo "new_version=true" >> $GITHUB_OUTPUT
+          else
+            echo "new_version=false" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: check_version
+    if: ${{ needs.check_version.outputs.new_version == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - name: Build gems
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bundle exec rake bundlebun:build
+      - name: Upload gems
+        uses: actions/upload-artifact@v3
+        with:
+          name: gems
+          path: |
+            *.gem
+            built_gems.txt
+
+  test-linux-x64:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: gems
+      - name: Test
+        run: |
+          docker run --rm -v $PWD:/gems ruby:3.3-slim bash -c "\
+          cd /gems && \
+          mkdir test && cd test && \
+          bundle init && \
+          echo \"source 'https://rubygems.org'\" > Gemfile && \
+          echo \"gem 'rake'\" >> Gemfile && \
+          echo \"gem 'bundlebun'\" >> Gemfile && \
+          echo \"require 'bundlebun'\" > Rakefile && \
+          gem install --verbose /gems/\$(grep x86_64-linux ../built_gems.txt) --no-document && \
+          bundle install && \
+          bundle exec rake bun:install && \
+          output=\$(./bin/bun -e 'console.log\(2+2\)') && \
+          stripped_output=\$(echo \"\$output\" | tr -d '\\n\\r') && \
+          if [ \"\$stripped_output\" != \"4\" ]; then \
+            echo \"Expected output '4', got '\$stripped_output'\" && \
+            exit 1; \
+          fi"
+
+  test-linux-arm64:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+      - uses: actions/download-artifact@v3
+        with:
+          name: gems
+      - name: Test
+        run: |
+          docker run --rm --platform linux/arm64 -v $PWD:/gems ruby:3.3-slim bash -c "\
+          cd /gems && \
+          mkdir test && cd test && \
+          bundle init && \
+          echo \"source 'https://rubygems.org'\" > Gemfile && \
+          echo \"gem 'rake'\" >> Gemfile && \
+          echo \"gem 'bundlebun'\" >> Gemfile && \
+          echo \"require 'bundlebun'\" > Rakefile && \
+          gem install --verbose /gems/\$(grep aarch64-linux ../built_gems.txt) --no-document && \
+          bundle install && \
+          bundle exec rake bun:install && \
+          output=\$(./bin/bun -e 'console.log\(2+2\)') && \
+          stripped_output=\$(echo \"\$output\" | tr -d '\\n\\r') && \
+          if [ \"\$stripped_output\" != \"4\" ]; then \
+            echo \"Expected output '4', got '\$stripped_output'\" && \
+            exit 1; \
+          fi"
+
+  test-darwin-arm64:
+    needs: build
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+      - uses: actions/download-artifact@v3
+        with:
+          name: gems
+      - name: Test
+        run: |
+          mkdir test && cd test && \
+          bundle init && \
+          echo "source 'https://rubygems.org'" > Gemfile && \
+          echo "gem 'rake'" >> Gemfile && \
+          echo "gem 'bundlebun'" >> Gemfile && \
+          echo "require 'bundlebun'" > Rakefile && \
+          gem install --verbose ../$(grep arm64-darwin ../built_gems.txt) --no-document && \
+          bundle install && \
+          bundle exec rake bun:install && \
+          output=$(./bin/bun -e 'console.log\(2+2\)') && \
+          stripped_output=$(echo "$output" | tr -d '\n\r') && \
+          if [ "$stripped_output" != "4" ]; then \
+            echo "Expected output '4', got '$stripped_output'" && \
+            exit 1; \
+          fi
+
+  test-darwin-x64:
+    needs: build
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+      - uses: actions/download-artifact@v3
+        with:
+          name: gems
+      - name: Test
+        run: |
+          mkdir test && cd test && \
+          bundle init && \
+          echo "source 'https://rubygems.org'" > Gemfile && \
+          echo "gem 'rake'" >> Gemfile && \
+          echo "gem 'bundlebun'" >> Gemfile && \
+          echo "require 'bundlebun'" > Rakefile && \
+          gem install --verbose ../$(grep x86_64-darwin ../built_gems.txt) --no-document && \
+          bundle install && \
+          bundle exec rake bun:install && \
+          output=$(./bin/bun -e 'console.log\(2+2\)') && \
+          stripped_output=$(echo "$output" | tr -d '\n\r') && \
+          if [ "$stripped_output" != "4" ]; then \
+            echo "Expected output '4', got '$stripped_output'" && \
+            exit 1; \
+          fi
+
+  test-windows:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: gems
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+      - name: Test
+        shell: pwsh
+        run: |
+          mkdir test
+          cd test
+          bundle init
+          Add-Content -Path Gemfile -Value "source 'https://rubygems.org'"
+          Add-Content -Path Gemfile -Value "gem 'rake'"
+          Add-Content -Path Gemfile -Value "gem 'bundlebun'"
+          Add-Content -Path Rakefile -Value "require 'bundlebun'"
+          $gemfile = Get-ChildItem -Filter "*x64-mingw-ucrt*.gem" -Path .. | Select-Object -ExpandProperty Name
+          gem install --verbose "../$gemfile" --no-document
+          bundle install
+          bundle exec rake bun:install
+          $output = & ruby "./bin/bun" -e "console.log(2+2)"
+          $stripped_output = $output -replace "`r`n|`n",""
+          if ($stripped_output -ne "4") {
+            Write-Error "Expected output '4', got '$stripped_output'"
+            exit 1
+          }
+
+  publish:
+    needs:
+      [
+        test-linux-x64,
+        test-linux-arm64,
+        test-darwin-arm64,
+        test-darwin-x64,
+        test-windows,
+      ]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - run: bundle install
+      - uses: actions/download-artifact@v3
+        with:
+          name: gems
+      - name: Publish to GitHub Releases and RubyGems
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: bundle exec rake bundlebun:publish
