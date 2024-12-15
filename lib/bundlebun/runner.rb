@@ -15,8 +15,8 @@ module Bundlebun
       #
       # Example:
       #
-      #   Bundlebun.call('--version')
-      #   Bundlebun.call(['add', 'postcss'])
+      #   Bundlebun.call('--version') # => `bun --version`
+      #   Bundlebun.call(['add', 'postcss']) => `bun add postcss`
       #
       # Returns error status <tt>127</tt> if the executable does not exist.
       def call(...)

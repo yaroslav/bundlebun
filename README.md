@@ -200,8 +200,8 @@ bun outdated v1.1.38 (bf2f153f)
 The easiest way to call Bun from Ruby would be `Bundlebun.call`:
 
 ```ruby
-Bundlebun.call("outdated")
-Bundlebun.call(["add", "postcss"])
+Bundlebun.call("outdated") # => `bun outdated`
+Bundlebun.call(["add", "postcss"]) # => `bun add postcss`
 ```
 
 Check out the [RDoc documentation](https://rubydoc.info/gems/bundlebun) for `Bundlebun::Runner` for helper methods. Some of the most useful ones:
