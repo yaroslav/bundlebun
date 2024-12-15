@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.metadata['source_code_uri'] = 'https://github.com/yaroslav/bundlebun'
   spec.metadata['changelog_uri'] = 'https://github.com/yaroslav/bundlebun/blob/master/CHANGELOG.md'
   spec.metadata['bug_tracker_uri'] = 'https://github.com/yaroslav/bundlebun/issues'
-  spec.metadata['documentation_uri'] = 'https://github.com/yaroslav/bundlebun/blob/main/README.md'
+  spec.metadata['documentation_uri'] = 'https://rubydoc.info/github/yaroslav/bundlebun/main'
   spec.post_install_message = 'Bun.'
 
   spec.files = Dir['lib/**/*', 'exe/*', 'LICENSE.txt', 'README.md', 'CHANGELOG.md']
