@@ -156,9 +156,9 @@ Bundlebun::Integrations::ExecJS.bun!
 
 bundlebun is designed to be used with Bundler: installed in specific projects, and launched via `bin/bun` or integrations.
 
-If you install the gem globally, you _won't see the `bun` executable_ as a wrapper for a bundled Bun runtime; instead, it would be called `bundlebun`. This is done to avoid possible conflicts in your `$PATH` with a "real" Bun runtime you might have installed: if Ruby gem-generated binstubs are in that path before your Bun runtime, you won't easily run it. And that is bundlebun is not greedy with the `bun` executable name.
+If you install the gem globally, you _won't see the `bun` executable_ as a wrapper for a Ruby-bundled Bun runtime; instead, it would be called `bundlebun`.
 
-If you wish to run Bun runtime globally using this gem, a simple symlink or a wrapper script will do, but the gem won't act destructively.
+This is done to avoid possible conflicts in your `$PATH` with if you have an actual Bun rintime installed: if the directory with Ruby gem-generated binstubs is in your `$PATH` path the directory with your Bun runtime, it may cause you a lot of confusion. And that why is bundlebun is _not_ greedy with the `bun` executable name. If you wish to run Bun runtime globally using this gem, a simple symlink or a wrapper script will do, but the gem won't act destructively.
 
 ## Usage
 
