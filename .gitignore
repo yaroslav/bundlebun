@@ -13,3 +13,5 @@
 # binaries
 /lib/bundlebun/vendor/bun/bun
 /lib/bundlebun/vendor/bun/bun.exe
+
+.env.dev
