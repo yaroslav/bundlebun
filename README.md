@@ -243,9 +243,9 @@ Next, remove the integrations you have in place:
 
 bundlebun gem downloads contain binary distributions of Bun available directly from https://github.com/oven-sh/bun/releases.
 
-[Bun](https://bun.sh) was created Jarred Sumner [@jarred-sumner](https://github.com/jarred-sumner) and co. and is distributed under MIT. Check their [LICENSE](https://github.com/oven-sh/bun/blob/main/LICENSE.md).
+[Bun](https://bun.sh) was created by Jarred Sumner [@jarred-sumner](https://github.com/jarred-sumner) & co. and is distributed under MIT. Check their [LICENSE](https://github.com/oven-sh/bun/blob/main/LICENSE.md).
 
-Big thanks to Jason Meller [@terracatta](https://github.com/terracatta) for his work on integrating Bun into the Rails ecosystem: jsbundling-rails support, cssbundling-rails support with a proper build configuration, turbo-rails and stimulus-rails support, ExecJS support. See this [Pull Request](https://github.com/rails/rails/pull/49241).
+Big thanks to Jason Meller [@terracatta](https://github.com/terracatta) for his work on integrating Bun into the Ruby on Rails ecosystem: jsbundling-rails support, cssbundling-rails support with a proper build configuration, turbo-rails and stimulus-rails support, ExecJS support. See this [Pull Request](https://github.com/rails/rails/pull/49241).
 
 ## Contributing
 
