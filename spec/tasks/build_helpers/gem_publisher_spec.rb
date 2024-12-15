@@ -69,7 +69,7 @@ RSpec.describe BuildHelpers::GemPublisher do
     it 'publishes gems to RubyGems' do
       gem_files.each do |gem_file|
         expect(publisher).to receive(:system)
-          .with("gem push #{gem_file} --key fake_rubygems_key", exception: true)
+          .with("gem push --key fake_rubygems_key #{gem_file}", exception: true)
       end
       publisher.publish
     end
