@@ -11,7 +11,7 @@
 
 ## Quickstart
 
-Within your Ruby or Rails project:
+Within your Ruby or Rails project, no Bun or anything like that required:
 
 ```sh
 bundle add bundlebun
@@ -21,7 +21,11 @@ rake bun:install
 and then
 
 ```sh
-bin/bun ...
+> bin/bun ...
+Bun is a fast JavaScript runtime, package manager, bundler, and test runner. (1.1.38+bf2f153f5)
+
+Usage: bun <command> [...flags] [...args]
+...
 ```
 
 ## Rationale
