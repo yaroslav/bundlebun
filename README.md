@@ -3,6 +3,7 @@
 **bundlebun bundles [Bun](https://bun.sh), a fast JavaScript runtime, package manager, and builder, with your Ruby and Rails applications**. No need to use Docker, devcontainers, `curl ... | sh`, or `brew`.
 
 [![Gem Version](https://badge.fury.io/rb/bundlebun.svg)](https://badge.fury.io/rb/bundlebun)
+[![Docs](https://img.shields.io/badge/yard-docs-blue.svg)](https://rubydoc.info/gems/bundlebun)
 
 ## Quickstart
 
@@ -212,7 +213,7 @@ bun outdated v1.1.38 (bf2f153f)
 
 ### Ruby
 
-**RDoc for bundlebun: https://rubydoc.info/gems/bundlebun**.
+**Check bundlebun API: https://rubydoc.info/gems/bundlebun**.
 
 The easiest way to call Bun from Ruby would be `Bundlebun.call`:
 
@@ -221,7 +222,7 @@ Bundlebun.call("outdated") # => `bun outdated`
 Bundlebun.call(["add", "postcss"]) # => `bun add postcss`
 ```
 
-Check out the [RDoc documentation](https://rubydoc.info/gems/bundlebun) for `Bundlebun::Runner` for helper methods. Some of the most useful ones:
+Check out the [API documentation](https://rubydoc.info/gems/bundlebun) for `Bundlebun::Runner` for helper methods. Some of the most useful ones:
 
 - `Bundlebun::Runner.binary_path`: returns the full path to the bundled Bun library.
 - `Bundlebun::Runner.binary_path_exist?`: checks if that binary even exists.

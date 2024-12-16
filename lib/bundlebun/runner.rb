@@ -1,50 +1,66 @@
 # frozen_string_literal: true
 
 module Bundlebun
-  # Runner is the class that bundlebun uses to run the bundled Bun executable.
+  # {Runner} is the class that bundlebun uses to run the bundled Bun executable.
   #
-  # See Bundlebun.
+  # @see Bundlebun
   class Runner
-    BINSTUB_PATH = 'bin/bun' # :nodoc:
-    RELATIVE_DIRECTORY = 'lib/bundlebun/vendor/bun' # :nodoc:
+    BINSTUB_PATH = 'bin/bun'
+    RELATIVE_DIRECTORY = 'lib/bundlebun/vendor/bun'
 
     class << self
-      # Runs the Bun runtime with parameters (can be String or Array of strings).
+      # Runs the Bun runtime with parameters.
       #
-      # See Bundlebun::Runner.new, Bundlebun::Runner.call.
+      # A wrapper for {Bundlebun::Runner.new}, {Bundlebun::Runner.call}.
       #
-      # Example:
+      # @param arguments [String, Array<String>] Command arguments to pass to Bun
+      # @return [Integer] Exit status code (`127` if executable not found)
       #
+      # @example String as an argument
       #   Bundlebun.call('--version') # => `bun --version`
-      #   Bundlebun.call(['add', 'postcss']) => `bun add postcss`
       #
-      # Returns error status <tt>127</tt> if the executable does not exist.
+      # @example Array of strings as an argument
+      #   Bundlebun.call(['add', 'postcss']) # => `bun add postcss`
+      #
+      # @see Bundlebun::Runner.new
+      # @see Bundlebun::Runner#call
       def call(...)
         new(...).call
       end
 
-      # A relative path to binstub bundlebun usually generates with installation Rake tasks.
+      # A relative path to binstub that bundlebun usually generates with installation Rake tasks.
+      #
+      # @return [String]
       def binstub_path
         BINSTUB_PATH
       end
 
       # A relative directory path to the bundled Bun executable from the root of the gem.
+      #
+      # @return [String]
       def relative_directory
         RELATIVE_DIRECTORY
       end
 
       # A full directory path to the bundled Bun executable from the root of the gem.
+      #
+      # @return [String]
       def full_directory
         File.expand_path("../../#{relative_directory}", __dir__)
       end
 
-      # A full path to the bundled Bun binary we run.
+      # A full path to the bundled Bun binary we run
+      # (includes `.exe` on Windows).
+      #
+      # @return [String]
       def binary_path
         executable = "bun#{RUBY_PLATFORM.match?(/mingw|mswin/) ? ".exe" : ""}"
         File.join(full_directory, executable)
       end
 
       # Does the bundled Bun binary exist?
+      #
+      # @return [Boolean]
       def binary_path_exist?
         File.exist?(binary_path)
       end
@@ -53,40 +69,46 @@ module Bundlebun
       #
       # If the binstub is installed (see binstub_path), use the binstub.
       # If not, use the full binary path for the bundled executable (binary_path).
+      #
+      # @return [String]
       def binstub_or_binary_path
         binstub_exist? ? binstub_path : binary_path
       end
 
       # Does the binstub exist?
+      #
+      # @return [Boolean]
       def binstub_exist?
         File.exist?(binstub_path)
       end
     end
 
-    # Intialize the runner with arguments to run the Bun runtime later via call.
+    # Intialize the {Runner} with arguments to run the Bun runtime later via #call.
     #
-    # Arguments can be a String or an Array of strings.
+    # @param arguments [String, Array<String>] Command arguments to pass to Bun
     #
-    # Example:
+    # @example String as an argument
+    #   Bundlebun::Runner.new('--version') # => `bun --version`
     #
-    #   Bundlebun::Runner.new('--version')
-    #   Bundlebun::Runner.new(['install', 'postcss'])
+    # @example Array of strings as an argument
+    #   Bundlebun::Runner.new(['add', 'postcss']) # => `bun add postcss`
     #
-    # Returns error status <tt>127</tt> if the executable does not exist.
+    # @see Bundlebun::Runner#call
     def initialize(arguments = '')
       @arguments = arguments
     end
 
     # Runs the Bun executable with previously specified arguments.
     #
-    # Returns error status <tt>127</tt> if the executable does not exist.
+    # Check other methods of {Bundlebun::Runner} to see how we determine what to run exactly.
     #
-    # Example:
+    # @return [Integer] Exit status code (`127` if executable not found)
     #
-    #   r = Bundlebun::Runner.new('--version')
-    #   r.call!
+    # @example
+    #   b = Bundlebun::Runner.new('--version')
+    #   b.call
     #
-    # Check other methods of Bundlebun::Runner to see how we determine what to run exactly.
+    # @see Bundlebun::Runner
     def call
       check_executable!
       exec(command)

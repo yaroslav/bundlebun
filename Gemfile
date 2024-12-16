@@ -5,8 +5,6 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'rake', '~> 13.0'
-gem 'rspec'
-gem 'webmock'
 
 # Integrations
 gem 'rails'
@@ -19,4 +17,12 @@ gem 'down'
 gem 'octokit'
 gem 'rubyzip'
 
+# Testing
+gem 'rspec'
+gem 'webmock'
+
+# Docs
+gem 'yard'
+
+# Linting
 gem 'standard', '~> 1.3'
