@@ -97,13 +97,30 @@ Alternatively, you can ensure an integration is loaded and the necessary modules
 
 Be sure to check both gems on documentation for bootstrapping your frontend build pipeline, as bundlebun supports them instead of duplicating approaches. cssbundling, for instance, includes an excellent sample build configuration for Bun.
 
-The bundlebun integration would be installed automatically, or you can run
+To quote their READMEs, try
+
+```sh
+bundle add cssbundling-rails
+bin/rails css:install:[tailwind|bootstrap|bulma|postcss|sass]
+bin/rails css:build
+```
+
+For cssbundling, and
+
+```sh
+bundle add jsbundling-rails
+bin/rails javascript:install:bun
+```
+
+for jsbundling.
+
+To install the bundlebun integration, run
 
 ```sh
 rake bun:install:rails
 ```
 
-manually. The task ensures a `bin/bun` binstub and installs an initializer/task of sorts to ensure both build-related gems use our bundled version of Bun.
+The task ensures a `bin/bun` binstub and installs an initializer/task of sorts to ensure both build-related gems use our bundled version of Bun.
 
 Alternatively, you can call
 
