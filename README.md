@@ -21,7 +21,7 @@ bin/bun ...
 
 ## Rationale
 
-**Modern frontend setup is needlessly complex** and may involve a lot of setup and maintenance. Developers need _at the very least_ a JavaScript runtime (typically, Node.js), a package manager (could be npm, yarn, or pnpm), and a build tool (Vite, Webpack, esbuild, Parcel—dozens of them).
+**Modern frontend setup is needlessly complex** and may involve a lot of maintenance. Developers need _at the very least_ a JavaScript runtime (typically, Node.js), a package manager (could be npm, yarn, or pnpm), and a build tool (Vite, Webpack, esbuild, Parcel—dozens of them).
 
 - One way forward is to dockerize development environments, creating unnecessary headaches for the development team—both frontend and backend engineers, especially if the team is not that large and the project is not that complex.
 - Another is to declare front-ops bankruptcy and pursue the "no-build" route.
