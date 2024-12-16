@@ -25,4 +25,5 @@ gem 'webmock'
 gem 'yard'
 
 # Linting
+gem 'lefthook'
 gem 'standard', '~> 1.3'

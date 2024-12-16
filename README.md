@@ -269,7 +269,9 @@ Big thanks to Jason Meller [@terracatta](https://github.com/terracatta) for his 
 
 ## Contributing
 
-Make sure you have up-to-date Ruby. Run `bundle install`. Run `rake bundlebun:download` to fetch a local version of Bun for tests. `rake rspec` to check if all tests pass.
+Make sure you have up-to-date Ruby. Run `bin/setup`: that would install the nesessary gems, install [lefthook](https://github.com/evilmartians/lefthook) and run `rake bundlebun:download` to fetch a local version of Bun for tests.
+
+`rake rspec` to check if all tests pass.
 
 Open an issue or a PR.
 

@@ -119,6 +119,7 @@ GEM
       railties (>= 6.0.0)
     json (2.9.0)
     language_server-protocol (3.17.0.3)
+    lefthook (1.9.2)
     lint_roller (1.1.0)
     logger (1.6.3)
     loofah (2.23.1)
@@ -282,6 +283,7 @@ DEPENDENCIES
   down
   execjs
   jsbundling-rails
+  lefthook
   octokit
   rails
   rake (~> 13.0)
