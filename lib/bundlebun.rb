@@ -2,29 +2,36 @@
 
 require 'zeitwerk'
 
-# bundlebun bundles Bun[https://bun.sh], a fast JavaScript runtime, package manager
+# bundlebun bundles [Bun](https://bun.sh), a fast JavaScript runtime, package manager
 # and builder, with your Ruby and Rails applications.
-# No Docker, devcontainers, <tt>curl | sh</tt>, or <tt>brew</tt> needed.
+# No Docker, devcontainers, `curl | sh`, or `brew` needed.
 #
 # bundlebun includes binary distributions of Bun for each of the supported
 # platforms (macOS, Linux, Windows) and architectures.
+#
+# @see Bundlebun::Runner
+# @see Bundlebun::Integrations
 module Bundlebun
   class << self
-    # Runs the Bun runtime with parameters (can be String or Array of strings).
+    # Runs the Bun runtime with parameters.
     #
-    # A shortcut for Bundlebun::Runner.call.
+    # A shortcut for {Bundlebun::Runner.call}.
     #
-    # Example:
+    # @param arguments [String, Array<String>] Command arguments to pass to Bun
+    # @return [Integer] Exit status code (`127` if executable not found)
     #
+    # @example String as an argument
     #   Bundlebun.call('--version') # => `bun --version`
-    #   Bundlebun.call(['add', 'postcss']) => `bun add postcss`
     #
-    # Returns error status <tt>127</tt> if the executable does not exist.
+    # @example Array of strings as an argument
+    #   Bundlebun.call(['add', 'postcss']) # => `bun add postcss`
+    #
+    # @see Bundlebun::Runner.call
     def call(...)
       Runner.call(...)
     end
 
-    def loader # :nodoc:
+    def loader # @private
       @loader ||= Zeitwerk::Loader.for_gem.tap do |loader|
         loader.ignore("#{__dir__}/tasks")
         loader.ignore("#{__dir__}/bundlebun/vendor")
@@ -36,11 +43,11 @@ module Bundlebun
       end
     end
 
-    def load_tasks # :nodoc:
+    def load_tasks # @private
       Dir[File.expand_path('tasks/*.rake', __dir__)].each { |task| load task }
     end
 
-    def bun = 'Bun' # :nodoc:
+    def bun = 'Bun'
     alias_method :bun?, :bun
     alias_method :bun!, :bun
   end

@@ -1,0 +1,12 @@
+--no-private
+--protected
+--embed-mixins
+--markup markdown
+--title "bundlebun"
+--readme README.md
+--exclude lib/templates
+--exclude lib/bundlebun/vendor
+lib/**/*.rb
+-
+LICENSE.txt
+CHANGELOG.md

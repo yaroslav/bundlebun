@@ -2,13 +2,16 @@
 
 module Bundlebun
   module Integrations
-    # An integration for vite-ruby[https://github.com/ElMassimo/vite_ruby] and vite-rails[https://vite-ruby.netlify.app/].
+    # An integration for [vite-ruby](https://github.com/ElMassimo/vite_ruby) and [vite-rails](https://vite-ruby.netlify.app).
     #
-    # For that, we would need both to replace the vite binstub (as <tt>bin/vite</tt>
+    # For that, we would need both to replace the vite binstub (as `bin/vite`
     # exists by itself and does not really initialize this gem if it is installed),
-    # and redefine the RunnerExtensions for ViteRuby by calling this patch from
+    # and redefine the {RunnerExtensions} for ViteRuby by calling this patch from
     # a Rails initializer.
-    # This way, a typical <tt>bin/dev</tt> would work, as well as integration tests.
+    # This way, a typical `bin/dev` would work, as well as integration tests.
+    #
+    # @see https://github.com/ElMassimo/vite_ruby
+    # @see https://vite-ruby.netlify.app
     module ViteRuby
       # Patches the existing module.
       #
@@ -16,13 +19,19 @@ module Bundlebun
       # For a Rails application, a good place is an initializer.
       #
       # See the documentation for more info on installation Rake tasks.
+      #
+      # @example
+      #   Bundlebun::Integrations::ViteRuby.bun!
       def self.bun!
         return unless defined?(::ViteRuby::Runner)
 
         ::ViteRuby::Runner.prepend(self::RunnerExtensions)
       end
 
-      module RunnerExtensions # :nodoc:
+      # A monkey-patch for ViteRuby.
+      #
+      # @see https://github.com/ElMassimo/vite_ruby/blob/main/vite_ruby/lib/vite_ruby/runner.rb
+      module RunnerExtensions
         # Internal: Resolves to an executable for Vite.
         #
         # We're overloading this to use with bundlebun.

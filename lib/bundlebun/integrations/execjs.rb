@@ -2,22 +2,27 @@
 
 module Bundlebun
   module Integrations
-    # An integration for execjs[https://github.com/rails/execjs].
+    # An integration for [execjs](https://github.com/rails/execjs).
     #
     # Runtimes in ExecJS are declared like this: https://github.com/rails/execjs/blob/master/lib/execjs/runtimes.rb
     # We will redefine the Bun one, changing its command.
     #
     # Then, we will automatically set the bundlebun-ed Bun as the default runtime.
+    #
+    # @see https://github.com/rails/execjs
     module ExecJS
       # Patches the existing module to use bundlebun-ed Bun in place of an
       # already existing, spported Bun runtime: we replace it with a bundled version.
       #
-      # Additionally, sets it asa default ExecJS runtime.
+      # Additionally, sets it as a default ExecJS runtime.
       #
       # Call this after everything is loaded and required.
       # For a Rails application, a good place is an initializer.
       #
       # See the documentation for more info on installation Rake tasks.
+      #
+      # @example
+      #   Bundlebun::Integrations::ExecJS.bun!
       def self.bun!
         return unless defined?(::ExecJS::Runtimes)
 
