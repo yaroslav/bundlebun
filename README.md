@@ -57,7 +57,7 @@ bundle add bundlebun
 ```
 
 If you are seeing a message like `Could not find gems matching 'bundlebun' valid for all resolution platforms
-(aarch64-linux, aarch64-linux-gnu <...> )`, this may be [a known issue with Bundler/`Gemfile.lock`](https://www.google.com/search?client=firefox-b-d&q=Could+not+find+gems+matching+all+resolution+platforms) you can fix. Open `Gemfile.lock` in your text editor, find a section called `PLATFORMS`, and alter a list of platforms you need to support. This can be a good default for most if you're targeting Linux amd macOS (for Windows, also leave entries with `x64_mingw`):
+(aarch64-linux, aarch64-linux-gnu <...> )`, this may be [a known issue with Bundler/`Gemfile.lock`](https://www.google.com/search?client=firefox-b-d&q=Could+not+find+gems+matching+all+resolution+platforms) you can fix. Open `Gemfile.lock` in your text editor, find a section called `PLATFORMS`, and alter a list of platforms you need to support. This can be a good default for most if you're targeting Linux and macOS (for Windows, also leave entries with `x64_mingw`):
 
 ```
 (rest of the file here)
