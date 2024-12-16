@@ -5,6 +5,10 @@
 [![Gem Version](https://badge.fury.io/rb/bundlebun.svg)](https://badge.fury.io/rb/bundlebun)
 [![Docs](https://img.shields.io/badge/yard-docs-blue.svg)](https://rubydoc.info/gems/bundlebun)
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/yaroslav/bundlebun/refs/heads/main/assets/mr-bundlebun-512.png" width="256" height="256" alt="Mr. Bundlebun">
+</div>
+
 ## Quickstart
 
 Within your Ruby or Rails project:
