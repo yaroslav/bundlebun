@@ -87,7 +87,7 @@ Next, the Rake task will try to detect the integrations we need to install based
 
 ### Integrations
 
-Running `rake bun:install` tries to detect already-loaded gems and run the corresponding installation tasks.
+`rake bun:install` will detect already-loaded gems and run the corresponding installation tasks.
 
 Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`: more on that below.
 
