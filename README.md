@@ -11,7 +11,7 @@
 
 ## Quickstart
 
-Within your Ruby or Rails project, no Bun or anything like that required:
+Starting with your Ruby or Rails project, no Bun or anything like that required:
 
 ```sh
 bundle add bundlebun
