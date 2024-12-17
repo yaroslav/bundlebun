@@ -1,6 +1,6 @@
 # bundlebun
 
-**bundlebun bundles [Bun](https://bun.sh) (a fast JavaScript runtime, package manager, and builder) with your Ruby and Rails applications**. No need to use Docker, devcontainers, `curl ... | sh`, or `brew`.
+**bundlebun bundles [Bun](https://bun.sh), a fast JavaScript runtime, package manager, and builder, with your Ruby and Rails applications**. No need to use Docker, devcontainers, `curl ... | sh`, or `brew`.
 
 [![Gem Version](https://badge.fury.io/rb/bundlebun.svg)](https://badge.fury.io/rb/bundlebun)
 [![Docs](https://img.shields.io/badge/yard-docs-blue.svg)](https://rubydoc.info/gems/bundlebun)
@@ -45,7 +45,7 @@ So, how about we just pack it into a Ruby gem as a binary and allow developers t
 
 ## Install
 
-Tbundlebun gem releases include a binary distribution of Bun for each supported Bun platform (macOS, Linux, Windows) and architecture.
+bundlebun gem releases include a binary distribution of Bun for each supported Bun platform (macOS, Linux, Windows) and architecture.
 
 First, add it to your `Gemfile`:
 
@@ -245,7 +245,7 @@ To uninstall, remove the gem:
 bundle remove bundlebun
 ```
 
-Or remove it from your `Gemfile`:
+Or remove it from your `Gemfile` and run bundler.
 
 Next, remove the integrations you have in place:
 
@@ -259,7 +259,7 @@ Next, remove the integrations you have in place:
 
 ## Acknowledgements
 
-bundlebun gem downloads contain binary distributions of Bun available directly from [https://github.com/oven-sh/bun/releases](https://github.com/oven-sh/bun/releases).
+bundlebun gem downloads contain binary distributions of Bun available directly from https://github.com/oven-sh/bun/releases.
 
 [Bun](https://bun.sh) was created by Jarred Sumner [@jarred-sumner](https://github.com/jarred-sumner) & co. and is distributed under MIT. Check their [LICENSE](https://github.com/oven-sh/bun/blob/main/LICENSE.md).
 
