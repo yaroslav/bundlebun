@@ -11,16 +11,6 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
   end
 
   it 'executes vite build through bun' do
-    skip <<~MESSAGE
-
-      At the moment, there is a bun regression where bun basically just spawns node to run vite, and, I suppose, many other major projects.
-      Here is the reason: https://bun.sh/docs/cli/bunx#shebangs. Apparently, if there is a Node shebang, Bun just spawns node :shrug:. However, we have a `--bun` flag to enforce the usage of Bun runtime. And it does not work at the moment, at least on macOS:
-
-        https://github.com/oven-sh/bun/issues/11869
-
-      To check when it gets fixed.
-    MESSAGE
-
     Dir.chdir(tmp_dir) do
       File.write('Gemfile', <<~RUBY)
         source 'https://rubygems.org'
@@ -34,7 +24,7 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
         require 'bundlebun'
       RUBY
 
-      _install_output, install_status = Open3.capture2e("cd #{tmp_dir} && bundle install && bundle exec vite install && rake bun:install && rake bun:install:vite && #{Bundlebun::Runner.binstub_or_binary_path} install")
+      _install_output, install_status = Open3.capture2e("cd #{tmp_dir} && bundle install && bundle exec vite install && bundle exec rake bun:install && bundle exec rake bun:install:vite && bundle exec ./bin/bun install")
       expect(install_status).to be_success
 
       FileUtils.mkdir_p('src')
@@ -70,7 +60,7 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
 
       output, status = Open3.capture2e("cd #{tmp_dir} && bin/vite build")
       expect(status).to be_success
-      expect(output).to match(/Bun v\d+\.\d+\.\d+/)
+      expect(output.to_s).to match(/Bun version: \d+\.\d+\.\d+/)
     end
   end
 end

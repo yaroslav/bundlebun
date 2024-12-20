@@ -7,61 +7,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
   let(:tmp_dir) { Dir.mktmpdir('rails_bundling_test') }
   let(:gem_root) { File.expand_path('../../../../', __dir__) }
 
-  # So, this is a spec that actually checks that something *FAILS*.
-  #
-  # We are creating a proper Rails application in a temp directory,
-  # using `rails new`, then we add `cssbundling-rails`,
-  # `jsbundling-rails` and `bundlebun`. After that, we do the
-  # recommended install tasks for those packing libraries, and
-  # properly install bundlebun.
-  # At this point, we need to check that both CSS and JS builds
-  # succeed and we need to make sure they are run using Bun.
-  #
-  # Something like:
-  #
-  #   File.write('bun-check-plugin.js', <<~JS)
-  #     import process from "node:process";
-  #
-  #     module.exports = () => ({
-  #       postcssPlugin: 'bun-check',
-  #       Once(root) {
-  #         root.append({ text: `/* Built with Bun ${Bun.version} */` })
-  #       }
-  #     })
-  #     module.exports.postcss = true
-  #   JS
-  #   File.write('postcss.config.js', <<~JS)
-  #     module.exports = {
-  #       plugins: [
-  #         require('./bun-check-plugin.js')()
-  #       ]
-  #     }
-  #   JS
-  #
-  #   ...
-  #
-  #   output, status = Open3.capture2e("bundle exec rake css:build")
-  #   expect(status).to be_success
-  #   expect(File).to exist('app/assets/builds/application.css')
-  #   css_output = File.read('app/assets/builds/application.css')
-  #   expect(css_output).to match(/Built with Bun \d+\.\d+\.\d+/)
-  #
-  # However, Bun acts weird. Long story short, it.. runs Node. Check:
-  #
-  #   https://bun.sh/docs/cli/bunx#shebangs
-  #
-  # There is a way to fight this behaviour, but it seems to be bugged now:
-  #
-  #   https://github.com/oven-sh/bun/issues/11869
-  #
-  # And so, the integration test fails.
-  #
-  # Instead, we fail it purposefully and see that the mentioned gems
-  # contain an error message that directly mentiones our binstub or
-  # the path to bundlebun included Bun binary. This way, we would know
-  # that the build script at least tried to run Bun.
-  # Fun times.
-
   before(:each) do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
@@ -94,15 +39,51 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         _output, status = capture("bundle exec rails javascript:install:bun")
         expect(status).to be_success
 
-        # install bundlebun
+        # Install bundlebun
         _output, status = capture("bundle exec rake bun:install")
         expect(status).to be_success
-        expect(File).to exist('lib/tasks/bundlebun.rake')
 
-        # Remove the build scripts to force failure
-        json = JSON.parse(File.read('package.json'))
-        json['scripts'] = {}
-        File.write('package.json', JSON.pretty_generate(json))
+        # Add Bun version check plugin for CSS
+        File.write('bun-check-plugin.js', <<~JS)
+          module.exports = () => ({
+            postcssPlugin: 'bun-check',
+            Once(root) {
+              root.append({ text: `/* Built with Bun ${Bun.version} */` })
+            }
+          })
+          module.exports.postcss = true
+        JS
+
+        File.write('postcss.config.js', <<~JS)
+          module.exports = {
+            plugins: [
+              require('./bun-check-plugin.js')()
+            ]
+          }
+        JS
+
+        # Add a basic CSS file
+        File.write('app/assets/stylesheets/application.postcss.css', <<~CSS)
+          body { background: #fff; }
+        CSS
+
+        # Add a basic JS file
+        File.write('app/javascript/application.js', <<~JS)
+          console.log('Runtime check');
+        JS
+
+        # Modify bun.config.js to output version
+        File.write('bun.config.js', <<~JS)
+          console.log('Bun version at config time:', Bun.version);
+
+          const config = {
+            sourcemap: "external",
+            entrypoints: ["app/javascript/application.js"],
+            outdir: "./app/assets/builds",
+          };
+
+          await Bun.build(config);
+        JS
       end
     end
   end
@@ -111,25 +92,36 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
     FileUtils.rm_rf(tmp_dir)
   end
 
-  describe Bundlebun::Integrations::Cssbundling do
-    it 'shows bundlebun binstub in error message when failing' do
+  describe 'CSS building' do
+    it 'successfully builds CSS using Bun' do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
-          output, _status = capture("bundle exec rake css:build")
+          _output, status = capture("bundle exec rake css:build")
+          expect(status).to be_success
 
-          expect(output).to match(/cssbundling-rails: Command build failed, ensure `(bin\/bun|bundlebun)/)
+          css_path = 'app/assets/builds/application.css'
+          expect(File).to exist(css_path)
+
+          css_content = File.read(css_path)
+          expect(css_content).to match(/Built with Bun \d+\.\d+\.\d+/)
         end
       end
     end
   end
 
-  describe Bundlebun::Integrations::Cssbundling do
-    it 'shows bundlebun binstub in error message when failing' do
+  describe 'JavaScript building' do
+    it 'successfully builds JavaScript using Bun' do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
-          output, _status = capture("bundle exec rake javascript:build")
+          output, status = capture("bundle exec rake javascript:build")
+          expect(status).to be_success
 
-          expect(output).to match(/jsbundling-rails.+ensure.+(bin\/bun|bundlebun)/i)
+          # Check that Bun was used by looking for the version output
+          expect(output).to match(/Bun version at config time: \d+\.\d+\.\d+/)
+
+          # Check that the file was actually built
+          js_path = 'app/assets/builds/application.js'
+          expect(File).to exist(js_path)
         end
       end
     end
