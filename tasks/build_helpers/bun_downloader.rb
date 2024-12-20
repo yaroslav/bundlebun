@@ -30,6 +30,12 @@ module BuildHelpers
       binary_path
     end
 
+    def clear!
+      Dir.glob(File.join(Bundlebun::Runner.full_directory, '{bun,bun.exe,bun*.zip}')).each do |file|
+        File.delete(file) if File.exist?(file)
+      end
+    end
+
     private
 
     def download_and_extract(bun_platform, binary_path)

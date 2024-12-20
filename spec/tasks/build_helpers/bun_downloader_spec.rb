@@ -84,4 +84,40 @@ RSpec.describe BuildHelpers::BunDownloader do
         .with(BuildHelpers::BUN_REPO)
     end
   end
+
+  context 'cleaning up' do
+    let(:downloader) { described_class.new }
+    let(:vendor_dir) { Bundlebun::Runner.full_directory }
+    let(:test_files) do
+      [
+        File.join(vendor_dir, 'bun'),
+        File.join(vendor_dir, 'bun.exe'),
+        File.join(vendor_dir, 'bun-1.0.0.zip'),
+        File.join(vendor_dir, 'some-other-file.txt')
+      ]
+    end
+
+    before do
+      allow(Dir).to receive(:glob)
+        .with(File.join(vendor_dir, '{bun,bun.exe,bun*.zip}'))
+        .and_return(test_files[0..2])
+
+      test_files.each do |file|
+        allow(File).to receive(:exist?).with(file).and_return(true)
+        allow(File).to receive(:delete).with(file)
+      end
+    end
+
+    it 'deletes all matching files in the vendor directory' do
+      downloader.clear!
+
+      # Should delete bun, bun.exe, and bun-1.0.0.zip
+      expect(File).to have_received(:delete).with(test_files[0])
+      expect(File).to have_received(:delete).with(test_files[1])
+      expect(File).to have_received(:delete).with(test_files[2])
+
+      # Should not delete other files
+      expect(File).not_to have_received(:delete).with(test_files[3])
+    end
+  end
 end

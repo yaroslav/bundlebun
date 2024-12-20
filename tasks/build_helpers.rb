@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'bundlebun'
+require_relative '../lib/bundlebun'
 
 module BuildHelpers
   BUN_REPO = 'oven-sh/bun'

@@ -6,4 +6,9 @@ namespace :bundlebun do
     binary_path = BuildHelpers::BunDownloader.new.download_for_current_platform
     puts "Bun binary downloaded to: #{File.expand_path(binary_path)}"
   end
+
+  task :clear do
+    puts "Cleaning Bun archives and executables.."
+    BuildHelpers::BunDownloader.new.clear!
+  end
 end
