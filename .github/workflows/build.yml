@@ -1,12 +1,14 @@
 name: Build and publish
 
 on:
-  workflow_run:
-    workflows: [Test]
-    types:
-      - completed
-    branches:
-      - main
+  workflow_dispatch:
+
+  # workflow_run:
+  #   workflows: [Test]
+  #   types:
+  #     - completed
+  #   branches:
+  #     - main
 
 # on:
 #   workflow_dispatch:
@@ -18,7 +20,7 @@ jobs:
   # release if a new Bun version is out.
   check_version:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
       new_version: ${{ steps.check_version.outputs.new_version }}
     steps:
