@@ -9,3 +9,14 @@ RSpec.configure do |config|
     end
   end
 end
+
+def capture(cmd)
+  env = {
+    'BUNDLE_GEMFILE' => File.join(tmp_dir, 'Gemfile'),
+    'BUNDLE_PATH' => File.join(tmp_dir, 'vendor/bundle'),
+    'BUNDLE_APP_CONFIG' => File.join(tmp_dir, '.bundle'),
+    'BUNDLE_DISABLE_SHARED_GEMS' => 'true',
+    'PATH' => "#{File.join(tmp_dir, "bin")}:#{File.join(tmp_dir, "vendor/bundle/bin")}:#{ENV["PATH"]}"
+  }
+  Open3.capture2e(env, cmd)
+end
