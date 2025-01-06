@@ -15,7 +15,7 @@ gem 'jsbundling-rails'
 # Build
 gem 'down'
 gem 'octokit'
-gem 'rubyzip'
+gem 'rubyzip', '~> 2.4.1'
 
 # Testing
 gem 'rspec'
