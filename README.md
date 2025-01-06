@@ -2,7 +2,7 @@
 
 **bundlebun bundles [Bun](https://bun.sh), a fast JavaScript runtime, package manager, and builder, with your Ruby and Rails applications**. No need to use Docker, devcontainers, `curl ... | sh`, or `brew`.
 
-[![Gem Version](https://badge.fury.io/rb/bundlebun.svg)](https://badge.fury.io/rb/bundlebun)
+[![GitHub Release](https://img.shields.io/github/v/release/yaroslav/bundlebun)](https://github.com/yaroslav/bundlebun/releases)
 [![Docs](https://img.shields.io/badge/yard-docs-blue.svg)](https://rubydoc.info/gems/bundlebun)
 
 <div align="center">
