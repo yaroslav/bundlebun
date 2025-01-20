@@ -15,9 +15,11 @@ def capture(cmd)
     'BUNDLE_GEMFILE' => File.join(tmp_dir, 'Gemfile'),
     'BUNDLE_PATH' => File.join(tmp_dir, 'vendor/bundle'),
     'BUNDLE_APP_CONFIG' => File.join(tmp_dir, '.bundle'),
-    'BUNDLE_DISABLE_SHARED_GEMS' => 'true',
-    'PATH' => "#{File.join(tmp_dir, "bin")}:#{ENV["PATH"]}"
+    'BUNDLE_DISABLE_SHARED_GEMS' => 'true'
   }
+
+  path_separator = /mswin|mingw|cygwin/.match?(RbConfig::CONFIG['host_os']) ? ';' : ':'
+  env['PATH'] = [File.join(tmp_dir, "bin"), ENV["PATH"]].join(path_separator)
 
   Open3.capture2e(env, cmd)
 end
