@@ -36,13 +36,13 @@ RSpec.describe 'rake bun:install' do
       Rake::Task['bun:install'].invoke
     end
 
-    context 'with Rails defined' do
+    context 'with Cssbundling/Jsbundling defined' do
       before do
-        stub_const('Rails', Class.new)
+        stub_const('Cssbundling', Class.new)
       end
 
-      it 'invokes the Rails installation task' do
-        expect(Rake::Task['bun:install:rails']).to receive(:invoke)
+      it 'invokes the bundling-rails installation task' do
+        expect(Rake::Task['bun:install:bundling-rails']).to receive(:invoke)
         Rake::Task['bun:install'].invoke
       end
     end
@@ -54,17 +54,6 @@ RSpec.describe 'rake bun:install' do
 
       it 'invokes the Vite installation task' do
         expect(Rake::Task['bun:install:vite']).to receive(:invoke)
-        Rake::Task['bun:install'].invoke
-      end
-    end
-
-    context 'with ExecJS defined' do
-      before do
-        stub_const('ExecJS', Class.new)
-      end
-
-      it 'invokes the ExecJS installation task' do
-        expect(Rake::Task['bun:install:execjs']).to receive(:invoke)
         Rake::Task['bun:install'].invoke
       end
     end
@@ -95,7 +84,7 @@ RSpec.describe 'rake bun:install' do
     end
   end
 
-  describe 'bun:install:rails' do
+  describe 'bun:install:bundling-rails' do
     let(:lib_tasks_dir) { 'lib/tasks' }
     let(:assets_rake_file) { File.join(lib_tasks_dir, 'bundlebun.rake') }
     let(:template_dir) { File.expand_path('../templates', __dir__) }
@@ -103,7 +92,7 @@ RSpec.describe 'rake bun:install' do
 
     before do
       allow(File).to receive(:exist?).with('bin/bun').and_return(true)
-      allow(File).to receive(:expand_path).with('../templates/rails/bundlebun.rake', anything)
+      allow(File).to receive(:expand_path).with('../templates/bundling-rails/bundlebun.rake', anything)
         .and_return(File.join(rails_template_dir, 'bundlebun.rake'))
     end
 
@@ -121,7 +110,7 @@ RSpec.describe 'rake bun:install' do
           assets_rake_file
         )
 
-        Rake::Task['bun:install:rails'].invoke
+        Rake::Task['bun:install:bundling-rails'].invoke
       end
     end
 
@@ -133,13 +122,9 @@ RSpec.describe 'rake bun:install' do
       end
 
       it 'skips creation of the rake task file' do
-        expect(FileUtils).to receive(:mkdir_p).with(lib_tasks_dir)
-        expect(FileUtils).to receive(:cp).with(
-          File.join(rails_template_dir, 'bundlebun.rake'),
-          assets_rake_file
-        ).and_return(false)
+        expect(FileUtils).not_to receive(:cp)
 
-        Rake::Task['bun:install:rails'].invoke
+        Rake::Task['bun:install:bundling-rails'].invoke
       end
     end
   end

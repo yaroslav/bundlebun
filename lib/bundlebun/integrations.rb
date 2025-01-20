@@ -10,5 +10,20 @@ module Bundlebun
   #
   # See the documentation to learn about the supported integrations.
   module Integrations
+    # Loads and initializes all available integrations. See specific classes
+    # for implementation.
+    #
+    # @return [Array<Module>] List of initialized integrations
+    #
+    # @example
+    #   Bundlebun::Integrations.bun! # => [Bundlebun::Integrations::Cssbundling, ...]
+    def self.bun!
+      integration_modules = constants.map { |const| const_get(const) }
+        .select { |const| const.is_a?(Module) }
+
+      integration_modules.select do |mod|
+        mod.respond_to?(:bun!) && mod.bun!
+      end
+    end
   end
 end

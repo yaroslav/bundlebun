@@ -10,7 +10,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
   before(:each) do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
-        # Create initial Gemfile with Rails
         File.write('Gemfile', <<~RUBY)
           source 'https://rubygems.org'
           gem 'rails'
@@ -18,7 +17,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         _output, status = capture("bundle install && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
         expect(status).to be_success
 
-        # Update Gemfile with our gems
         File.write('Gemfile', <<~RUBY, mode: 'a+')
           gem 'cssbundling-rails'
           gem 'jsbundling-rails'

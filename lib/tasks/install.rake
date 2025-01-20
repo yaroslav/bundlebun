@@ -16,19 +16,14 @@ namespace :bun do
 
     Rake::Task['bun:install:bin'].invoke
 
-    if defined?(Rails)
-      puts "Rails detected.\n\n"
-      Rake::Task['bun:install:rails'].invoke
+    if defined?(Cssbundling) || defined?(Jsbundling)
+      puts "Rails' cssbundling/jsbundling detected.\n\n"
+      Rake::Task['bun:install:bundling-rails'].invoke
     end
 
     if defined?(ViteRuby)
       puts "vite-ruby detected.\n\n"
       Rake::Task['bun:install:vite'].invoke
-    end
-
-    if defined?(ExecJS)
-      puts "ExecJS detected.\n\n"
-      Rake::Task['bun:install:execjs'].invoke
     end
   end
 
@@ -58,18 +53,20 @@ namespace :bun do
     MESSAGE
   end
 
-  desc 'Install bundlebun: Rails, cssbundling-rails, jsbundling-rails integration'
-  task 'install:rails' => :install do
-    puts "Installing Rails integration...\n\n"
+  desc 'Install bundlebun: cssbundling-rails, jsbundling-rails integration'
+  task 'install:bundling-rails' => :install do
+    puts "Installing cssbundling/jsbundling Rails integration...\n\n"
 
-    assets_rake = File.expand_path('../templates/rails/bundlebun.rake', __dir__)
+    assets_rake = File.expand_path('../templates/bundling-rails/bundlebun.rake', __dir__)
     target_dir = 'lib/tasks'
     target = File.join(target_dir, 'bundlebun.rake')
 
-    if FileUtils.mkdir_p(target_dir) && FileUtils.cp(assets_rake, target)
-      puts "Installed an initializer with overrides for cssbundling-rails and jsbundling-rails at #{target}"
-    else
+    if File.exist?(target)
       puts "#{target} already exists."
+    else
+      FileUtils.mkdir_p(target_dir)
+      FileUtils.cp(assets_rake, target)
+      puts "Installed an initializer with overrides for cssbundling-rails and jsbundling-rails at #{target}"
     end
 
     puts <<~MESSAGE

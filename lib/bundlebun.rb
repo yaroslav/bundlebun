@@ -43,8 +43,16 @@ module Bundlebun
       end
     end
 
+    def prepend_to_path # @private
+      EnvPath.prepend(Runner.full_directory)
+    end
+
     def load_tasks # @private
       Dir[File.expand_path('tasks/*.rake', __dir__)].each { |task| load task }
+    end
+
+    def load_integrations # @private
+      Integrations.bun!
     end
 
     def bun = 'Bun'
@@ -54,5 +62,6 @@ module Bundlebun
 end
 
 Bundlebun.loader
-
+Bundlebun.prepend_to_path
 Bundlebun.load_tasks if defined?(Rake)
+Bundlebun.load_integrations

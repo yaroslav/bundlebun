@@ -47,7 +47,7 @@ So, how about we just pack it into a Ruby gem as a binary and allow developers t
 
 bundlebun gem releases include a binary distribution of Bun for each supported Bun platform (macOS, Linux, Windows) and architecture.
 
-First, add it to your `Gemfile`:
+First, add it to your `Gemfile`. Make sure to add it _after_ your existing frontend- and build-related librares:
 
 ```ruby
 gem "bundlebun"
@@ -96,7 +96,7 @@ Next, the Rake task will try to detect the integrations we need to install based
 
 ### Integrations
 
-`rake bun:install` will detect already-loaded gems and run the corresponding installation tasks.
+Usually, if you've placed `gem 'bundlebun'` after your frontend-related gems in the `Gemfile`, and did `rake bun:install`, the integrations should all be working out of the box.
 
 Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`: more on that below.
 
@@ -121,20 +121,13 @@ bundle add jsbundling-rails
 bin/rails javascript:install:bun
 ```
 
-To install the bundlebun integration, run
+To make sure the bundlebun integration is installed, run
 
 ```sh
 rake bun:install:rails
 ```
 
 The task makes sure a `bin/bun` binstub exists and installs an initializer/task of sorts to ensure both build-related gems use our bundled version of Bun.
-
-Alternatively, you can call the following in one of your project's rakefiles:
-
-```ruby
-Bundlebun::Integrations::Cssbundling.bun!
-Bundlebun::Integrations::Jsbundling.bun!
-```
 
 #### vite-ruby and vite-rails
 
@@ -198,6 +191,10 @@ Usage: bun <command> [...flags] [...args]
 ### Return codes
 
 Note that with this (or any other option to run Bun), bundlebun will return the error code `127` if the executable is not found.
+
+### `PATH`
+
+The bundlebun gem adds the directory with a binary Bun distribution to your `PATH`: prepends it there, to be exact. That helps existing tools that can detect the presence of `bun` executable to find it and work with no further setup or monkey-patching.
 
 ### Rake
 

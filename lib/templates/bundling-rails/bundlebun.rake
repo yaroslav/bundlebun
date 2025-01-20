@@ -1,4 +1,4 @@
-# An initializer of sorts for bundlebun's ExecJS integration.
+# An initializer of sorts for bundlebun's integration.
 # Can't go to `initializers`, does not trigger that way.
 #
 # This forces cssbundling and jsbundling to use a bundlebun'ed
