@@ -94,7 +94,8 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
     it 'successfully builds CSS using Bun' do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
-          _output, status = capture("bundle exec rake css:build")
+          output, status = capture("bundle exec rake css:build")
+          puts output
           expect(status).to be_success
 
           css_path = 'app/assets/builds/application.css'
@@ -112,6 +113,7 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
           output, status = capture("bundle exec rake javascript:build")
+          puts output
           expect(status).to be_success
 
           # Check that Bun was used by looking for the version output

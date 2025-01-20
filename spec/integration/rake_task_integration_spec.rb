@@ -18,6 +18,7 @@ RSpec.describe 'rake bun integration', type: :integration do
     Dir.chdir(tmp_dir) do
       output, status = Open3.capture2e(%{rake "bun[-e 'console.log\\(2+2\\)'"]})
       expect(status).to be_success
+      puts output
       expect(output.strip).to eq('4')
     end
   end

@@ -40,6 +40,7 @@ RSpec.describe 'ExecJS integration', type: :integration do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
         output, status = capture("bundle exec rails runner \"puts ExecJS.eval('Bun.version')\"")
+        puts output
         expect(status).to be_success
         expect(output).to match(/\d+\.\d+\.\d+/)
       end
