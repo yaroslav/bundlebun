@@ -18,7 +18,7 @@ def capture(cmd)
     'BUNDLE_DISABLE_SHARED_GEMS' => 'true'
   }
 
-  path_separator = /mswin|mingw|cygwin/.match?(RbConfig::CONFIG['host_os']) ? ';' : ':'
+  path_separator = Bundlebun::Platform.windows? ? ';' : ':'
   env['PATH'] = [File.join(tmp_dir, "bin"), ENV["PATH"]].join(path_separator)
 
   Open3.capture2e(env, cmd)

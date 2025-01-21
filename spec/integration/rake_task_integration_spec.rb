@@ -16,7 +16,7 @@ RSpec.describe 'rake bun integration', type: :integration do
 
   it 'successfully executes the binary through rake task and returns a result' do
     Dir.chdir(tmp_dir) do
-      command = if /mswin|mingw|cygwin/.match?(RbConfig::CONFIG['host_os'])
+      command = if Bundlebun::Platform.windows?
         'rake "bun[-e \"console.log(2+2)\"]"'
       else
         # Use single quotes for Unix
