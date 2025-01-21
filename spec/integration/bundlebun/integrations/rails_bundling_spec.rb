@@ -94,6 +94,14 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
     it 'successfully builds CSS using Bun' do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
+          puts "\n=== CSS Building Debug ==="
+          puts "Working directory: #{Dir.pwd}"
+          puts "Binary path: #{Bundlebun::Runner.binary_path}"
+          puts "Binstub path: #{Bundlebun::Runner.binstub_path}"
+          puts "Full binstub path: #{File.join(Dir.pwd, Bundlebun::Runner.binstub_path)}"
+          puts "PATH: #{ENV["PATH"]}"
+          puts "==================\n"
+
           output, status = capture("bundle exec rake css:build")
           puts output
           expect(status).to be_success
