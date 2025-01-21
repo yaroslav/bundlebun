@@ -16,6 +16,10 @@ RSpec.describe Bundlebun::Platform do
         })
       end
 
+      after do
+        described_class.remove_instance_variable(:@windows) if described_class.instance_variable_defined?(:@windows)
+      end
+
       it { is_expected.to be true }
     end
 
@@ -27,6 +31,10 @@ RSpec.describe Bundlebun::Platform do
         stub_const('RbConfig::CONFIG', {
           'host_os' => 'darwin19.0.0'
         })
+      end
+
+      after do
+        described_class.remove_instance_variable(:@windows) if described_class.instance_variable_defined?(:@windows)
       end
 
       it { is_expected.to be false }

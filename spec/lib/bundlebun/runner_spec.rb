@@ -38,6 +38,11 @@ RSpec.describe Bundlebun::Runner do
         described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
       end
 
+      after do
+        Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+        described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+      end
+
       it 'returns path with bun binary' do
         expect(File.basename(described_class.binary_path)).to eq('bun')
       end
@@ -51,6 +56,11 @@ RSpec.describe Bundlebun::Runner do
         stub_const('RbConfig::CONFIG', {
           'host_os' => 'mingw32'
         })
+        Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+        described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+      end
+
+      after do
         Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
         described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
       end
