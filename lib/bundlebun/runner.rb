@@ -54,7 +54,7 @@ module Bundlebun
       #
       # @return [String]
       def binary_path
-        executable = "bun#{RUBY_PLATFORM.match?(/mingw|mswin/) ? ".exe" : ""}"
+        executable = "bun#{Bundlebun::Platform.windows? ? ".exe" : ""}"
         File.join(full_directory, executable)
       end
 

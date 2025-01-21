@@ -16,7 +16,7 @@
 #
 #   bin/bun ...
 #
-# If you're seeing this in your `bin/` directory and you're
+# If you're looking at this file in your `bin/` directory and you're
 # no longer using bundlebun, it should be safe to delete.
 begin
   require 'bundler/setup'

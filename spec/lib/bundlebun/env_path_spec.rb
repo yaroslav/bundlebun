@@ -33,7 +33,7 @@ RSpec.describe Bundlebun::EnvPath do
       new_path = '/opt/bun/bin'
       described_class.prepend(new_path)
 
-      expected = described_class.on_windows? ?
+      expected = Bundlebun::Platform.windows? ?
         "#{new_path};#{sample_path}" :
         "#{new_path}:#{sample_path}"
 
@@ -49,7 +49,7 @@ RSpec.describe Bundlebun::EnvPath do
     end
 
     it 'is case-insensitive on Windows' do
-      allow(described_class).to receive(:on_windows?).and_return(true)
+      allow(Bundlebun::Platform).to receive(:windows?).and_return(true)
 
       new_path = '/Opt/Bun/Bin'
       ENV['PATH'] = "/opt/bun/bin;#{sample_path}"
@@ -61,7 +61,7 @@ RSpec.describe Bundlebun::EnvPath do
 
   describe 'detecting the separator' do
     it 'returns the correct separator for the platform' do
-      expected_separator = described_class.on_windows? ? ';' : ':'
+      expected_separator = Bundlebun::Platform.windows? ? ';' : ':'
       expect(described_class.separator).to eq(expected_separator)
     end
   end

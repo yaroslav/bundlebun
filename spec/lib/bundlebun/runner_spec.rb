@@ -29,7 +29,12 @@ RSpec.describe Bundlebun::Runner do
     context 'on Unix-like systems' do
       before do
         allow(described_class).to receive(:binary_path).and_call_original
-        stub_const('RUBY_PLATFORM', 'x86_64-linux')
+
+        stub_const('RbConfig', Module.new)
+        stub_const('RbConfig::CONFIG', {
+          'host_os' => 'darwin19.0.0'
+        })
+        Bundlebun::Platform.remove_instance_variable(:@windows)
       end
 
       it 'returns path with bun binary' do
@@ -40,7 +45,12 @@ RSpec.describe Bundlebun::Runner do
     context 'on Windows' do
       before do
         allow(described_class).to receive(:binary_path).and_call_original
-        stub_const('RUBY_PLATFORM', 'mswin')
+
+        stub_const('RbConfig', Module.new)
+        stub_const('RbConfig::CONFIG', {
+          'host_os' => 'mingw32'
+        })
+        Bundlebun::Platform.remove_instance_variable(:@windows)
       end
 
       it 'returns path with bun.exe binary' do

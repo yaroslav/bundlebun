@@ -31,11 +31,10 @@ module Bundlebun
       def prepend(new_path)
         return if new_path.nil? || new_path.empty?
 
-        path_to_check = on_windows? ? path.downcase : path
-        check_path = on_windows? ? new_path.downcase : new_path
-        return if path_to_check.start_with?(check_path)
+        path_to_check = Bundlebun::Platform.windows? ? path.downcase : path
+        check_path = Bundlebun::Platform.windows? ? new_path.downcase : new_path
 
-        self.path = "#{new_path}#{separator}#{path}"
+        self.path = "#{new_path}#{separator}#{path}" unless path_to_check.start_with?(check_path)
         path
       end
 
@@ -45,17 +44,7 @@ module Bundlebun
       def separator
         return @separator if defined?(@separator)
 
-        @separator = on_windows? ? ';' : ':'
-      end
-
-      # Are we running on Windows?
-      #
-      # @return [Boolean]
-      def on_windows?
-        return @on_windows if defined?(@on_windows)
-
-        @on_windows = defined?(RbConfig) && defined?(RbConfig::CONFIG) &&
-          RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+        @separator = Bundlebun::Platform.windows? ? ';' : ':'
       end
     end
   end
