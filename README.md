@@ -92,6 +92,8 @@ The task will install a binstub (`bin/bun`) that you can use to run Bun commands
 
 You should use `bin/bun` in your scripts, including your local runners like `Procfile.dev` or `Procfile`, and `package.json`—if you had a call to `node` or `bun` in the `scripts` section there.
 
+_Windows tip:_ If you're on Windows, the `bin\bun.cmd` file will be created, so you will be able to run `bin\bun ...` from the command line. If only the Unix-like binstub exists at that location, just run `rake bun:install` again.
+
 Next, the Rake task will try to detect the integrations we need to install based on the classes and modules Rake can see in your project. We'll continue with integrations.
 
 ### Integrations

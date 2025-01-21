@@ -17,6 +17,7 @@ RSpec.describe 'rake bun:install' do
 
     allow(File).to receive(:exist?).and_return(false)
     allow(File).to receive(:expand_path).and_return('/source/path')
+    allow(File).to receive(:read).with('/source/path').and_return("#!/usr/bin/env ruby\nputs 'hello'")
 
     allow($stdout).to receive(:puts)
   end
@@ -60,25 +61,63 @@ RSpec.describe 'rake bun:install' do
   end
 
   describe 'bun:install:bin' do
+    let(:binstub) { 'bin/bun' }
+    let(:cmd_binstub) { 'bin/bun.cmd' }
+    let(:source_content) { "#!/usr/bin/env ruby\nputs 'hello'" }
+
     before do
-      allow(File).to receive(:exist?).with('bin/bun').and_return(false)
+      allow(File).to receive(:exist?).with(binstub).and_return(false)
+      allow(File).to receive(:exist?).with(cmd_binstub).and_return(false)
+      allow(File).to receive(:write).and_return(true)
+      allow(Gem).to receive(:win_platform?).and_return(true)
     end
 
-    it 'creates the binstub file' do
-      expect(FileUtils).to receive(:mkdir_p).with('bin')
-      expect(FileUtils).to receive(:cp)
-      expect(FileUtils).to receive(:chmod).with(0o755, 'bin/bun')
-
-      Rake::Task['bun:install:bin'].invoke
-    end
-
-    context 'when binstub already exists' do
+    context 'when binstub does not exist' do
       before do
-        allow(File).to receive(:exist?).with('bin/bun').and_return(true)
+        allow(File).to receive(:exist?).with(binstub).and_return(false)
       end
 
-      it 'skips creation of binstub' do
-        expect(FileUtils).not_to receive(:cp)
+      it 'creates the Unix binstub' do
+        expect(FileUtils).to receive(:mkdir_p).with('bin')
+        expect(File).to receive(:write).with(binstub, source_content, mode: "w")
+        expect(FileUtils).to receive(:chmod).with(0o755, binstub)
+        Rake::Task['bun:install:bin'].invoke
+      end
+    end
+
+    context 'when binstub exists' do
+      before do
+        allow(File).to receive(:exist?).with(binstub).and_return(true)
+      end
+
+      it 'skips the Unix binstub' do
+        expect(File).not_to receive(:write).with(binstub, anything, anything)
+        Rake::Task['bun:install:bin'].invoke
+      end
+    end
+
+    context 'when Windows binstub does not exist' do
+      before do
+        allow(File).to receive(:exist?).with(cmd_binstub).and_return(false)
+      end
+
+      it 'creates the Windows binstub' do
+        expect(File).to receive(:write).with(
+          cmd_binstub,
+          "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n" + source_content,
+          mode: "wb:UTF-8"
+        )
+        Rake::Task['bun:install:bin'].invoke
+      end
+    end
+
+    context 'when Windows binstub exists' do
+      before do
+        allow(File).to receive(:exist?).with(cmd_binstub).and_return(true)
+      end
+
+      it 'skips the Windows binstub' do
+        expect(File).not_to receive(:write).with(cmd_binstub, anything, anything)
         Rake::Task['bun:install:bin'].invoke
       end
     end

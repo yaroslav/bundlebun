@@ -34,15 +34,31 @@ namespace :bun do
     source = File.expand_path('../../exe/bundlebun', __dir__)
     target_dir = 'bin'
     target = File.join(target_dir, 'bun')
+    content = File.read(source)
 
     if File.exist?(target)
       puts "#{target} already exists."
     else
       FileUtils.mkdir_p(target_dir)
-      FileUtils.cp(source, target)
+      File.write(target, content, mode: "w")
       FileUtils.chmod(0o755, target)
 
       puts "Installed binstub at #{target}."
+    end
+
+    # We're using Bundler technique to generate the .cmd wrappers on
+    # Windows (as Windows cannot run files with shebangs, of course).
+    # There is no public API for generating binstubs (I wish), so that's a copy and paste.
+    # @see https://github.com/rubygems/rubygems/blob/186a4f24789e6e7fd967b290ce93ed5886ef22d8/bundler/lib/bundler/installer.rb#L137
+    if Gem.win_platform?
+      cmd_target = "#{target}.cmd"
+      if File.exist?(cmd_target)
+        puts "#{cmd_target} already exists."
+      else
+        prefix = "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n"
+        File.write(cmd_target, prefix + content, mode: "wb:UTF-8")
+        puts "Installed Windows binstub at #{cmd_target}"
+      end
     end
 
     puts <<~MESSAGE

@@ -8,7 +8,7 @@ RSpec.describe Bundlebun::Platform do
 
     context 'when running on Windows' do
       before do
-        described_class.remove_instance_variable(:@windows)
+        described_class.remove_instance_variable(:@windows) if described_class.instance_variable_defined?(:@windows)
 
         stub_const('RbConfig', Module.new)
         stub_const('RbConfig::CONFIG', {
@@ -21,7 +21,7 @@ RSpec.describe Bundlebun::Platform do
 
     context 'when running on non-Windows system' do
       before do
-        described_class.remove_instance_variable(:@windows)
+        described_class.remove_instance_variable(:@windows) if described_class.instance_variable_defined?(:@windows)
 
         stub_const('RbConfig', Module.new)
         stub_const('RbConfig::CONFIG', {
