@@ -46,7 +46,9 @@ module Bundlebun
       #
       # @return [String]
       def full_directory
-        File.expand_path("../../#{relative_directory}", __dir__)
+        return @full_directory if defined?(@full_directory)
+
+        @full_directory = File.expand_path("../../#{relative_directory}", __dir__)
       end
 
       # A full path to the bundled Bun binary we run
@@ -54,8 +56,10 @@ module Bundlebun
       #
       # @return [String]
       def binary_path
+        return @binary_path if defined?(@binary_path)
+
         executable = "bun#{Bundlebun::Platform.windows? ? ".exe" : ""}"
-        File.join(full_directory, executable)
+        @binary_path = File.join(full_directory, executable)
       end
 
       # Does the bundled Bun binary exist?

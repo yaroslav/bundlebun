@@ -35,6 +35,7 @@ RSpec.describe Bundlebun::Runner do
           'host_os' => 'darwin19.0.0'
         })
         Bundlebun::Platform.remove_instance_variable(:@windows)
+        described_class.remove_instance_variable(:@binary_path)
       end
 
       it 'returns path with bun binary' do
@@ -51,6 +52,7 @@ RSpec.describe Bundlebun::Runner do
           'host_os' => 'mingw32'
         })
         Bundlebun::Platform.remove_instance_variable(:@windows)
+        described_class.remove_instance_variable(:@binary_path)
       end
 
       it 'returns path with bun.exe binary' do
