@@ -8,7 +8,7 @@ module BuildHelpers
       'aarch64-linux' => 'linux-aarch64',
       'arm64-darwin' => 'darwin-aarch64',
       'x86_64-darwin' => 'darwin-x64',
-      'x64-mingw-ucrt' => 'windows-x64'
+      'x64-mingw-ucrt' => 'windows-x64-baseline'
     }.freeze
 
     def self.bun_platform_for(ruby_platform)
