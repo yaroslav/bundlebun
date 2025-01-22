@@ -18,6 +18,7 @@ RSpec.describe 'rake bun:install' do
     allow(File).to receive(:exist?).and_return(false)
     allow(File).to receive(:expand_path).and_return('/source/path')
     allow(File).to receive(:read).with('/source/path').and_return("#!/usr/bin/env ruby\nputs 'hello'")
+    allow(File).to receive(:write)
 
     allow($stdout).to receive(:puts)
   end
