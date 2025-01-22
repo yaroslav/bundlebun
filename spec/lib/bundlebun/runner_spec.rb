@@ -84,8 +84,50 @@ RSpec.describe Bundlebun::Runner do
   end
 
   describe 'binstub handling' do
-    it 'returns the binstub path' do
-      expect(described_class.binstub_path).to eq('bin/bun')
+    context 'with binstub path' do
+      context 'on Windows' do
+        before do
+          allow(described_class).to receive(:binary_path).and_call_original
+
+          stub_const('RbConfig', Module.new)
+          stub_const('RbConfig::CONFIG', {
+            'host_os' => 'mingw32'
+          })
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        after do
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        it 'returns the binstub path as-is on Unix-like systems' do
+          expect(described_class.binstub_path).to eq('bin/bun.cmd')
+        end
+      end
+
+      context 'on Unix-like systems' do
+        before do
+          allow(described_class).to receive(:binary_path).and_call_original
+
+          stub_const('RbConfig', Module.new)
+          stub_const('RbConfig::CONFIG', {
+            'host_os' => 'darwin19.0.0'
+          })
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        after do
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        it 'returns the binstub path as-is on Unix-like systems' do
+          expect(described_class.binstub_path).to eq('bin/bun')
+        end
+      end
     end
 
     context 'when binstub exists' do

@@ -30,9 +30,11 @@ module Bundlebun
 
       # A relative path to binstub that bundlebun usually generates with installation Rake tasks.
       #
+      # For Windows, the binstub path will return the `bun.cmd` wrapper.
+      #
       # @return [String]
       def binstub_path
-        BINSTUB_PATH
+        Bundlebun::Platform.windows? ? "#{BINSTUB_PATH}.cmd" : BINSTUB_PATH
       end
 
       # A relative directory path to the bundled Bun executable from the root of the gem.
