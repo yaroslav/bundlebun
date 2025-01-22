@@ -156,32 +156,4 @@ namespace :bun do
 
     MESSAGE
   end
-
-  desc 'Install bundlebun: ExecJS integration'
-  task 'install:execjs' => :install do
-    puts "Installing ExecJS integration...\n\n"
-
-    initializers_dir = 'config/initializers'
-    initializer = File.expand_path('../templates/execjs/bundlebun-execjs.rb', __dir__)
-    initializer_target = File.join(initializers_dir, 'bundlebun-execjs.rb')
-
-    if File.directory?(initializers_dir)
-      if File.exist?(initializer_target)
-        puts "#{initializer_target} already exists."
-      else
-        FileUtils.cp(initializer, initializer_target)
-        puts "Installed a Rails initializer for ExecJS at #{initializer_target}."
-      end
-    else
-      puts "Directory #{initializers_dir} does not seem to exist; not installing a Rails initializer."
-    end
-
-    puts <<~MESSAGE
-      We've installed a Rails initializer that re-defines the Bun runtime for ExecJS and
-      sets Bun as a default runtime.
-
-      Bun.
-
-    MESSAGE
-  end
 end

@@ -153,15 +153,11 @@ Bundlebun::Integrations::ViteRuby.bun!
 
 #### ExecJS
 
-[ExecJS](https://github.com/rails/execjs) runs JavaScript code straight from Ruby. To do so, it supports a bunch of runtimes it can launch—and get a result. The Bun runtime already exists for ExecJS; we just need to ensure it uses the bundled one.
+[ExecJS](https://github.com/rails/execjs) runs JavaScript code straight from Ruby. To do so, it supports a bunch of runtimes it can launch—and get a result. The Bun runtime support already exists for ExecJS; we just need to ensure it uses the bundled one.
 
-The bundlebun integration can be installed automatically, or you can run:
+The bundlebun integration will work automatically if bundlebun is loaded after ExecJS in the `Gemfile`.
 
-```sh
-rake bun:install:execjs
-```
-
-This will create an initializer to redefine the Bun runtime for ExecJS and force its usage to be default. Alternatively, you can call:
+Alternatively, you can load the integration yourself:
 
 ```ruby
 Bundlebun::Integrations::ExecJS.bun!
