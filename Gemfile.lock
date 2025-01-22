@@ -303,6 +303,7 @@ DEPENDENCIES
   execjs
   faraday-retry
   jsbundling-rails
+  json
   lefthook
   octokit
   rails

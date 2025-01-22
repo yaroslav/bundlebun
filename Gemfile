@@ -11,6 +11,7 @@ gem 'rails'
 gem 'execjs'
 gem 'cssbundling-rails'
 gem 'jsbundling-rails'
+gem 'json'
 
 # Build
 gem 'down'
