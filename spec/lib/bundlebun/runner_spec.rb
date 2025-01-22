@@ -100,7 +100,7 @@ RSpec.describe Bundlebun::Runner do
           described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
         end
 
-        it 'returns the binstub path as-is on Unix-like systems' do
+        it 'returns the binstub path as-is on Windows' do
           expect(described_class.binstub_path).to eq('bin/bun.cmd')
         end
       end
