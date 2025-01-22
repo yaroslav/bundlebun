@@ -72,7 +72,7 @@ RSpec.describe BuildHelpers::BunDownloader do
       binary_path = downloader.download_for('x64-mingw-ucrt')
 
       expect(Down).to have_received(:download)
-        .with("https://github.com/#{BuildHelpers::BUN_REPO}/releases/download/bun-v1.0.0/bun-windows-x64.zip")
+        .with("https://github.com/#{BuildHelpers::BUN_REPO}/releases/download/bun-v1.0.0/bun-windows-x64-baseline.zip")
       expect(binary_path).to eq('lib/bundlebun/vendor/bun/bun.exe')
     end
   end
