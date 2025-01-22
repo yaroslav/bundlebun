@@ -87,8 +87,6 @@ RSpec.describe Bundlebun::Runner do
     context 'with binstub path' do
       context 'on Windows' do
         before do
-          allow(described_class).to receive(:binary_path).and_call_original
-
           stub_const('RbConfig', Module.new)
           stub_const('RbConfig::CONFIG', {
             'host_os' => 'mingw32'
@@ -109,8 +107,6 @@ RSpec.describe Bundlebun::Runner do
 
       context 'on Unix-like systems' do
         before do
-          allow(described_class).to receive(:binary_path).and_call_original
-
           stub_const('RbConfig', Module.new)
           stub_const('RbConfig::CONFIG', {
             'host_os' => 'darwin19.0.0'
@@ -132,7 +128,7 @@ RSpec.describe Bundlebun::Runner do
 
     context 'when binstub exists' do
       before do
-        allow(File).to receive(:exist?).with('bin/bun').and_return(true)
+        allow(File).to receive(:exist?).and_return(true)
       end
 
       it 'returns true' do
@@ -142,7 +138,7 @@ RSpec.describe Bundlebun::Runner do
 
     context 'when binstub does not exist' do
       before do
-        allow(File).to receive(:exist?).with('bin/bun').and_return(false)
+        allow(File).to receive(:exist?).and_return(false)
       end
 
       it 'returns false' do
@@ -152,20 +148,21 @@ RSpec.describe Bundlebun::Runner do
 
     describe 'returning binstub or true binary path' do
       let(:binary_path) { described_class.binary_path }
+      let(:binstub_path) { described_class.binstub_path }
 
       context 'when binstub exists' do
         before do
-          allow(File).to receive(:exist?).with('bin/bun').and_return(true)
+          allow(File).to receive(:exist?).and_return(true)
         end
 
         it 'returns binstub path' do
-          expect(described_class.binstub_or_binary_path).to eq('bin/bun')
+          expect(described_class.binstub_or_binary_path).to eq(binstub_path)
         end
       end
 
       context 'when binstub does not exist' do
         before do
-          allow(File).to receive(:exist?).with('bin/bun').and_return(false)
+          allow(File).to receive(:exist?).and_return(false)
         end
 
         it 'returns binary path' do
