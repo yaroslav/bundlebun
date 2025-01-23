@@ -146,17 +146,27 @@ RSpec.describe Bundlebun::Runner do
       end
     end
 
+    describe 'with full binstub path' do
+      before do
+        allow(File).to receive(:expand_path).and_call_original
+      end
+
+      it 'returns absolute path for binstub' do
+        expect(described_class.full_binstub_path).to eq(File.expand_path(described_class.binstub_path))
+      end
+    end
+
     describe 'returning binstub or true binary path' do
       let(:binary_path) { described_class.binary_path }
-      let(:binstub_path) { described_class.binstub_path }
+      let(:full_binstub_path) { described_class.full_binstub_path }
 
       context 'when binstub exists' do
         before do
           allow(File).to receive(:exist?).and_return(true)
         end
 
-        it 'returns binstub path' do
-          expect(described_class.binstub_or_binary_path).to eq(binstub_path)
+        it 'returns full binstub path' do
+          expect(described_class.binstub_or_binary_path).to eq(full_binstub_path)
         end
       end
 
