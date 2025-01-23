@@ -38,7 +38,8 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         expect(status).to be_success
 
         # Install bundlebun
-        _output, status = capture("bundle exec rake bun:install")
+        output, status = capture("bundle exec rake bun:install")
+        puts output
         expect(status).to be_success
 
         # Add Bun version check plugin for CSS

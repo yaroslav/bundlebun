@@ -28,10 +28,5 @@ def capture(cmd)
   puts "==================\n"
 
   output, status = Open3.capture2e(env, cmd)
-  puts "\n=== Command Output ==="
-  puts output
-  puts "Exit status: #{status.exitstatus}"
-  puts "==================\n"
-
   [output, status]
 end

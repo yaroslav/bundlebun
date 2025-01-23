@@ -13,14 +13,6 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
   it 'executes vite build through bun' do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
-        puts "\n=== Vite Integration Debug ==="
-        puts "Working directory: #{Dir.pwd}"
-        puts "Binary path: #{Bundlebun::Runner.binary_path}"
-        puts "Binstub path: #{Bundlebun::Runner.binstub_path}"
-        puts "Full binstub path: #{File.join(Dir.pwd, Bundlebun::Runner.binstub_path)}"
-        puts "PATH: #{ENV["PATH"]}"
-        puts "==================\n"
-
         File.write('Gemfile', <<~RUBY)
           source 'https://rubygems.org'
           gem 'rake'

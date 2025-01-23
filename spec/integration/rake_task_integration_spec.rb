@@ -19,13 +19,11 @@ RSpec.describe 'rake bun integration', type: :integration do
       command = if Bundlebun::Platform.windows?
         'rake "bun[-e \"console.log(2+2)\"]"'
       else
-        # Use single quotes for Unix
         %{rake "bun[-e 'console.log\\(2+2\\)']"}
       end
 
       output, status = Open3.capture2e(command)
       expect(status).to be_success
-      puts output
       expect(output.strip).to eq('4')
     end
   end
