@@ -104,20 +104,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           puts File.read('package.json')
           puts "==================\n"
 
-          output, _ = capture("#{Bundlebun::Runner.binstub_or_binary_path} --version")
-          puts "Direct bun version: #{output}"
-
-          output, _ = capture("#{Bundlebun::Runner.binstub_or_binary_path} run")
-          puts "Available scripts: #{output}"
-
-          output, _ = capture("assoc .cmd")
-          puts "CMD association: #{output}"
-          output, _ = capture("ftype cmdfile")
-          puts "CMD handler: #{output}"
-
-          output, _ = capture("whoami /groups")
-          puts "Process permissions: #{output}"
-
           output, status = capture("bundle exec rake css:build")
           puts output
           expect(status).to be_success
