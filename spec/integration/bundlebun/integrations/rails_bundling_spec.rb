@@ -104,6 +104,12 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           puts File.read('package.json')
           puts "==================\n"
 
+          puts "Testing direct bun:"
+          output, _ = capture("#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css")
+          puts output
+          puts "=== build_command:"
+          puts Bundlebun::Integrations::Cssbundling::Tasks.build_command
+
           output, status = capture("bundle exec rake css:build")
           puts output
           expect(status).to be_success
