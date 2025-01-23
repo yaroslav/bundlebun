@@ -100,6 +100,8 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           puts "Binstub path: #{Bundlebun::Runner.binstub_path}"
           puts "Full binstub path: #{File.join(Dir.pwd, Bundlebun::Runner.binstub_path)}"
           puts "PATH: #{ENV["PATH"]}"
+          puts "Package.json content:"
+          puts File.read('package.json')
           puts "==================\n"
 
           output, status = capture("bundle exec rake css:build")
