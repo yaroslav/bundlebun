@@ -38,11 +38,11 @@ module Bundlebun
         extend self
 
         def install_command
-          "#{Bundlebun::Runner.binstub_or_binary_path} install"
+          "#{Bundlebun::Runner.binary_path} install"
         end
 
         def build_command
-          "#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css"
+          "#{Bundlebun::Runner.binary_path} run --bun build:css"
         end
       end
     end
