@@ -36,11 +36,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Remove Node.js and npm
-        run: |
-          Remove-Item -Path "C:\Program Files\nodejs" -Recurse -Force
-          Remove-Item -Path "C:\npm" -Recurse -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path "$env:APPDATA\npm" -Recurse -Force -ErrorAction SilentlyContinue
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
