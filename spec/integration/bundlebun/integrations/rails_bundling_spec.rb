@@ -135,19 +135,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           end
           puts "Done removing binstubs"
 
-          # Add Bun's debug output
-          output, _status = capture("#{Bundlebun::Runner.binstub_or_binary_path} run --debug --bun build:css")
-          puts "Bun debug output:"
-          puts output
-
-          # Try getting Bun's process info
-          output, _status = capture("#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css --trace")
-          puts "Trace output:"
-          puts output
-
-          puts "Testing direct bun:"
-          output, _ = capture("#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css")
-          puts output
           puts "=== build_command:"
           puts Bundlebun::Integrations::Cssbundling::Tasks.build_command
 
