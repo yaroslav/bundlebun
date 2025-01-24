@@ -44,8 +44,6 @@ jobs:
           bundler: latest
         env:
           BUNDLE_FROZEN: "false"
-      - name: Disable binstub generation for npm
-        run: npm config set bin-links false --global
       - name: Download the bun executable for integration tests
         run: bundle exec rake bundlebun:download
       - name: Run RSpec
