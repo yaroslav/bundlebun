@@ -50,6 +50,15 @@ module Bundlebun
           warn `dir node_modules\\.bin\\postcss* 2>&1`
           warn "npm global modules:"
           warn `npm list -g postcss-cli 2>&1`
+          warn "PostCSS executables content:"
+          warn "postcss.bunx:"
+          warn File.read('node_modules/.bin/postcss.bunx')
+          warn "postcss.cmd:"
+          warn File.read('node_modules/.bin/postcss.cmd')
+          warn "PostCSS package content:"
+          warn `dir node_modules\\postcss-cli\\* /s`
+          warn "Package.json dependencies:"
+          warn File.read('package.json')
           warn "==================="
           cmd
         end
