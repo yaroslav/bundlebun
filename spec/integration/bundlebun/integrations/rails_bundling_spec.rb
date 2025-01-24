@@ -49,7 +49,7 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           module.exports = () => ({
             postcssPlugin: 'bun-check',
             Once(root) {
-              root.append({ text: `/* Built with Bun ${Bun.version} */` })
+              root.append({ text: `/* Built with Bun ${process.versions.bun || 'not found'} */` })
             }
           })
           module.exports.postcss = true
