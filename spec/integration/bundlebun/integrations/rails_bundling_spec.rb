@@ -30,15 +30,17 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         FileUtils.mkdir_p('app/assets/builds')
         FileUtils.mkdir_p('app/javascript')
 
-        # Install CSS and JS bundling
-        _output, status = capture("bundle exec rails css:install:postcss")
-        expect(status).to be_success
-
-        _output, status = capture("bundle exec rails javascript:install:bun")
-        expect(status).to be_success
-
         # Install bundlebun
         output, status = capture("bundle exec rake bun:install")
+        puts output
+        expect(status).to be_success
+
+        # Install CSS and JS bundling
+        output, status = capture("bundle exec rails css:install:postcss")
+        puts output
+        expect(status).to be_success
+
+        output, status = capture("bundle exec rails javascript:install:bun")
         puts output
         expect(status).to be_success
 
