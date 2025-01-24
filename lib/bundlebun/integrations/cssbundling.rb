@@ -42,7 +42,13 @@ module Bundlebun
         end
 
         def build_command
-          "#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css"
+          cmd = "#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css"
+          puts "Bundlebun cssbundling command: #{cmd}"
+          # Add process/environment info
+          puts "Process info:"
+          puts "- PWD: #{Dir.pwd}"
+          puts "- ENV: #{ENV.to_h.select { |k, _| k.match?(/BUN|NODE|PATH/) }.inspect}"
+          cmd
         end
       end
     end
