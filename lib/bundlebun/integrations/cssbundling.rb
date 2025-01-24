@@ -52,11 +52,23 @@ module Bundlebun
           warn `npm list -g postcss-cli 2>&1`
           warn "PostCSS executables content:"
           warn "postcss.bunx:"
-          warn File.read('node_modules/.bin/postcss.bunx')
+          begin
+            warn File.read('node_modules/.bin/postcss.bunx')
+          rescue
+            ""
+          end
           warn "postcss.cmd:"
-          warn File.read('node_modules/.bin/postcss.cmd')
+          begin
+            warn File.read('node_modules/.bin/postcss.cmd')
+          rescue
+            ""
+          end
           warn "PostCSS package content:"
-          warn `dir node_modules\\postcss-cli\\* /s`
+          begin
+            warn `dir node_modules\\postcss-cli\\* /s`
+          rescue
+            ""
+          end
           warn "Package.json dependencies:"
           warn File.read('package.json')
           warn "==================="

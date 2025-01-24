@@ -10,12 +10,18 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
   before(:each) do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
+        puts "\n=== Initial Setup ==="
+        puts `dir node_modules\\.bin 2>&1`
+
         File.write('Gemfile', <<~RUBY)
           source 'https://rubygems.org'
           gem 'rails'
         RUBY
         _output, status = capture("bundle install && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
         expect(status).to be_success
+
+        puts "\n=== After Rails Setup ==="
+        puts `dir node_modules\\.bin 2>&1`
 
         File.write('Gemfile', <<~RUBY, mode: 'a+')
           gem 'cssbundling-rails'
@@ -35,10 +41,24 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         puts output
         expect(status).to be_success
 
+        puts "\n=== Before PostCSS Install ==="
+        puts `dir node_modules\\.bin\\postcss* 2>&1`
+        puts "PostCSS package.json:"
+        begin
+          puts File.read('package.json')
+        rescue
+          "No package.json"
+        end
+        puts "==================="
+
         # Install CSS and JS bundling
         output, status = capture("bundle exec rails css:install:postcss")
         puts output
         expect(status).to be_success
+
+        puts "=== After PostCSS Install ==="
+        puts `dir node_modules\\.bin\\postcss* /b`
+        puts "==================="
 
         output, status = capture("bundle exec rails javascript:install:bun")
         puts output
