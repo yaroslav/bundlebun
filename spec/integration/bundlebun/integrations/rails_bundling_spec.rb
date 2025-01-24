@@ -127,6 +127,14 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           puts File.read('package.json')
           puts "==================\n"
 
+          puts "Let's remove binstubs!"
+          begin
+            FileUtils.rm_rf(Dir.glob('node_modules/.bin/*'))
+          rescue
+            # Nothing
+          end
+          puts "Done removing binstubs"
+
           # Add Bun's debug output
           output, _status = capture("#{Bundlebun::Runner.binstub_or_binary_path} run --debug --bun build:css")
           puts "Bun debug output:"
