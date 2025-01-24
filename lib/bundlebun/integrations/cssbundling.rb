@@ -43,11 +43,14 @@ module Bundlebun
 
         def build_command
           cmd = "#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css"
-          puts "Bundlebun cssbundling command: #{cmd}"
-          # Add process/environment info
-          puts "Process info:"
-          puts "- PWD: #{Dir.pwd}"
-          puts "- ENV: #{ENV.to_h.select { |k, _| k.match?(/BUN|NODE|PATH/) }.inspect}"
+          warn "=== PostCSS Binary Debug ==="
+          warn "Looking for postcss binary:"
+          warn `where postcss`  # Windows equivalent of 'which'
+          warn "node_modules/.bin:"
+          warn `dir node_modules\\.bin\\postcss* 2>&1`
+          warn "npm global modules:"
+          warn `npm list -g postcss-cli 2>&1`
+          warn "==================="
           cmd
         end
       end
