@@ -25,8 +25,7 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
           require 'bundlebun'
         RUBY
 
-        install_output, install_status = capture("cd #{tmp_dir} && bundle install && bundle exec vite install && bundle exec rake bun:install && bundle exec rake bun:install:vite && bundle exec ./bin/bun install")
-        puts install_output
+        _install_output, install_status = capture("cd #{tmp_dir} && bundle install && bundle exec vite install && bundle exec rake bun:install && bundle exec rake bun:install:vite && bundle exec ./bin/bun install")
         expect(install_status).to be_success
 
         FileUtils.mkdir_p('src')

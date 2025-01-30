@@ -125,11 +125,6 @@ module Bundlebun
     #
     # @see Bundlebun::Runner
     def call
-      puts "Bundlebun runner executing:"
-      puts "- Command: #{command}"
-      puts "- Binary path: #{self.class.binary_path}"
-      puts "- Arguments: #{arguments.inspect}"
-
       check_executable!
       exec(command)
     end

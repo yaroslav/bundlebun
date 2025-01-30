@@ -42,37 +42,7 @@ module Bundlebun
         end
 
         def build_command
-          cmd = "#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css"
-          warn "=== PostCSS Binary Debug ==="
-          warn "Looking for postcss binary:"
-          warn `where postcss`  # Windows equivalent of 'which'
-          warn "node_modules/.bin:"
-          warn `dir node_modules\\.bin\\postcss* 2>&1`
-          warn "npm global modules:"
-          warn `npm list -g postcss-cli 2>&1`
-          warn "PostCSS executables content:"
-          warn "postcss.bunx:"
-          begin
-            warn File.read('node_modules/.bin/postcss.bunx')
-          rescue
-            ""
-          end
-          warn "postcss.cmd:"
-          begin
-            warn File.read('node_modules/.bin/postcss.cmd')
-          rescue
-            ""
-          end
-          warn "PostCSS package content:"
-          begin
-            warn `dir node_modules\\postcss-cli\\* /s`
-          rescue
-            ""
-          end
-          warn "Package.json dependencies:"
-          warn File.read('package.json')
-          warn "==================="
-          cmd
+          "#{Bundlebun::Runner.binstub_or_binary_path} run --bun build:css"
         end
       end
     end

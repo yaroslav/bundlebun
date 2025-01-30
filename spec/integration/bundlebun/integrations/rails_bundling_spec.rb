@@ -10,18 +10,12 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
   before(:each) do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
-        puts "\n=== Initial Setup ==="
-        puts `dir node_modules\\.bin 2>&1`
-
         File.write('Gemfile', <<~RUBY)
           source 'https://rubygems.org'
           gem 'rails'
         RUBY
         _output, status = capture("bundle install && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
         expect(status).to be_success
-
-        puts "\n=== After Rails Setup ==="
-        puts `dir node_modules\\.bin 2>&1`
 
         File.write('Gemfile', <<~RUBY, mode: 'a+')
           gem 'cssbundling-rails'
@@ -37,31 +31,14 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         FileUtils.mkdir_p('app/javascript')
 
         # Install bundlebun
-        output, status = capture("bundle exec rake bun:install")
-        puts output
+        _output, status = capture("bundle exec rake bun:install")
         expect(status).to be_success
-
-        puts "\n=== Before PostCSS Install ==="
-        puts `dir node_modules\\.bin\\postcss* 2>&1`
-        puts "PostCSS package.json:"
-        begin
-          puts File.read('package.json')
-        rescue
-          "No package.json"
-        end
-        puts "==================="
 
         # Install CSS and JS bundling
-        output, status = capture("bundle exec rails css:install:postcss")
-        puts output
+        _output, status = capture("bundle exec rails css:install:postcss")
         expect(status).to be_success
 
-        puts "=== After PostCSS Install ==="
-        puts `dir node_modules\\.bin\\postcss* /b`
-        puts "==================="
-
-        output, status = capture("bundle exec rails javascript:install:bun")
-        puts output
+        _output, status = capture("bundle exec rails javascript:install:bun")
         expect(status).to be_success
 
         # Add Bun version check plugin for CSS
@@ -117,34 +94,11 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
     it 'successfully builds CSS using Bun' do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
-          puts "\n=== CSS Building Debug ==="
-          puts "Working directory: #{Dir.pwd}"
-          puts "Binary path: #{Bundlebun::Runner.binary_path}"
-          puts "Binstub path: #{Bundlebun::Runner.binstub_path}"
-          puts "Full binstub path: #{File.join(Dir.pwd, Bundlebun::Runner.binstub_path)}"
-          puts "PATH: #{ENV["PATH"]}"
-          puts "Package.json content:"
-          puts File.read('package.json')
-          puts "==================\n"
-
-          puts "Let's remove binstubs!"
-          begin
-            FileUtils.rm_rf(Dir.glob('node_modules/.bin/*'))
-          rescue
-            # Nothing
-          end
-          puts "Done removing binstubs"
-
-          puts "=== build_command:"
-          puts Bundlebun::Integrations::Cssbundling::Tasks.build_command
-
-          output, status = capture("bundle exec rake css:build")
-          puts output
+          _output, status = capture("bundle exec rake css:build")
           expect(status).to be_success
 
           css_path = 'app/assets/builds/application.css'
           expect(File).to exist(css_path)
-
           css_content = File.read(css_path)
           expect(css_content).to match(/Built with Bun \d+\.\d+\.\d+/)
         end
@@ -157,7 +111,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
           output, status = capture("bundle exec rake javascript:build")
-          puts output
           expect(status).to be_success
 
           # Check that Bun was used by looking for the version output

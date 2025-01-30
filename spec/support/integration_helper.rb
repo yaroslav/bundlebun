@@ -21,12 +21,6 @@ def capture(cmd)
   path_separator = Bundlebun::Platform.windows? ? ';' : ':'
   env['PATH'] = [File.join(tmp_dir, "bin"), ENV["PATH"]].join(path_separator)
 
-  puts "\n=== Executing Command ==="
-  puts "Command: #{cmd}"
-  puts "Environment:"
-  env.each { |k, v| puts "  #{k}=#{v}" }
-  puts "==================\n"
-
   output, status = Open3.capture2e(env, cmd)
   [output, status]
 end
