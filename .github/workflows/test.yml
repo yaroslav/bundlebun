@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - "3.3.6"
+          - "3.3.7"
           - "3.2.6"
           - "3.4.1"
 
@@ -21,6 +21,25 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          bundler: latest
+        env:
+          BUNDLE_FROZEN: "false"
+      - name: Download the bun executable for integration tests
+        run: bundle exec rake bundlebun:download
+      - name: Run RSpec
+        run: bundle exec rake
+
+  build-windows:
+    runs-on: windows-2025
+    name: Ruby on Windows
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4.1"
           bundler-cache: true
           bundler: latest
         env:

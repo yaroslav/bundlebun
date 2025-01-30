@@ -17,6 +17,8 @@ RSpec.describe 'rake bun:install' do
 
     allow(File).to receive(:exist?).and_return(false)
     allow(File).to receive(:expand_path).and_return('/source/path')
+    allow(File).to receive(:read).with('/source/path').and_return("#!/usr/bin/env ruby\nputs 'hello'")
+    allow(File).to receive(:write)
 
     allow($stdout).to receive(:puts)
   end
@@ -36,13 +38,13 @@ RSpec.describe 'rake bun:install' do
       Rake::Task['bun:install'].invoke
     end
 
-    context 'with Rails defined' do
+    context 'with Cssbundling/Jsbundling defined' do
       before do
-        stub_const('Rails', Class.new)
+        stub_const('Cssbundling', Class.new)
       end
 
-      it 'invokes the Rails installation task' do
-        expect(Rake::Task['bun:install:rails']).to receive(:invoke)
+      it 'invokes the bundling-rails installation task' do
+        expect(Rake::Task['bun:install:bundling-rails']).to receive(:invoke)
         Rake::Task['bun:install'].invoke
       end
     end
@@ -57,45 +59,72 @@ RSpec.describe 'rake bun:install' do
         Rake::Task['bun:install'].invoke
       end
     end
-
-    context 'with ExecJS defined' do
-      before do
-        stub_const('ExecJS', Class.new)
-      end
-
-      it 'invokes the ExecJS installation task' do
-        expect(Rake::Task['bun:install:execjs']).to receive(:invoke)
-        Rake::Task['bun:install'].invoke
-      end
-    end
   end
 
   describe 'bun:install:bin' do
+    let(:binstub) { 'bin/bun' }
+    let(:cmd_binstub) { 'bin/bun.cmd' }
+    let(:source_content) { "#!/usr/bin/env ruby\nputs 'hello'" }
+
     before do
-      allow(File).to receive(:exist?).with('bin/bun').and_return(false)
+      allow(File).to receive(:exist?).with(binstub).and_return(false)
+      allow(File).to receive(:exist?).with(cmd_binstub).and_return(false)
+      allow(File).to receive(:write).and_return(true)
+      allow(Gem).to receive(:win_platform?).and_return(true)
     end
 
-    it 'creates the binstub file' do
-      expect(FileUtils).to receive(:mkdir_p).with('bin')
-      expect(FileUtils).to receive(:cp)
-      expect(FileUtils).to receive(:chmod).with(0o755, 'bin/bun')
-
-      Rake::Task['bun:install:bin'].invoke
-    end
-
-    context 'when binstub already exists' do
+    context 'when binstub does not exist' do
       before do
-        allow(File).to receive(:exist?).with('bin/bun').and_return(true)
+        allow(File).to receive(:exist?).with(binstub).and_return(false)
       end
 
-      it 'skips creation of binstub' do
-        expect(FileUtils).not_to receive(:cp)
+      it 'creates the Unix binstub' do
+        expect(FileUtils).to receive(:mkdir_p).with('bin')
+        expect(File).to receive(:write).with(binstub, source_content, mode: "w")
+        expect(FileUtils).to receive(:chmod).with(0o755, binstub)
+        Rake::Task['bun:install:bin'].invoke
+      end
+    end
+
+    context 'when binstub exists' do
+      before do
+        allow(File).to receive(:exist?).with(binstub).and_return(true)
+      end
+
+      it 'skips the Unix binstub' do
+        expect(File).not_to receive(:write).with(binstub, anything, anything)
+        Rake::Task['bun:install:bin'].invoke
+      end
+    end
+
+    context 'when Windows binstub does not exist' do
+      before do
+        allow(File).to receive(:exist?).with(cmd_binstub).and_return(false)
+      end
+
+      it 'creates the Windows binstub' do
+        expect(File).to receive(:write).with(
+          cmd_binstub,
+          "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n" + source_content,
+          mode: "wb:UTF-8"
+        )
+        Rake::Task['bun:install:bin'].invoke
+      end
+    end
+
+    context 'when Windows binstub exists' do
+      before do
+        allow(File).to receive(:exist?).with(cmd_binstub).and_return(true)
+      end
+
+      it 'skips the Windows binstub' do
+        expect(File).not_to receive(:write).with(cmd_binstub, anything, anything)
         Rake::Task['bun:install:bin'].invoke
       end
     end
   end
 
-  describe 'bun:install:rails' do
+  describe 'bun:install:bundling-rails' do
     let(:lib_tasks_dir) { 'lib/tasks' }
     let(:assets_rake_file) { File.join(lib_tasks_dir, 'bundlebun.rake') }
     let(:template_dir) { File.expand_path('../templates', __dir__) }
@@ -103,7 +132,7 @@ RSpec.describe 'rake bun:install' do
 
     before do
       allow(File).to receive(:exist?).with('bin/bun').and_return(true)
-      allow(File).to receive(:expand_path).with('../templates/rails/bundlebun.rake', anything)
+      allow(File).to receive(:expand_path).with('../templates/bundling-rails/bundlebun.rake', anything)
         .and_return(File.join(rails_template_dir, 'bundlebun.rake'))
     end
 
@@ -121,7 +150,7 @@ RSpec.describe 'rake bun:install' do
           assets_rake_file
         )
 
-        Rake::Task['bun:install:rails'].invoke
+        Rake::Task['bun:install:bundling-rails'].invoke
       end
     end
 
@@ -133,119 +162,161 @@ RSpec.describe 'rake bun:install' do
       end
 
       it 'skips creation of the rake task file' do
-        expect(FileUtils).to receive(:mkdir_p).with(lib_tasks_dir)
-        expect(FileUtils).to receive(:cp).with(
-          File.join(rails_template_dir, 'bundlebun.rake'),
-          assets_rake_file
-        ).and_return(false)
+        expect(FileUtils).not_to receive(:cp)
 
-        Rake::Task['bun:install:rails'].invoke
+        Rake::Task['bun:install:bundling-rails'].invoke
       end
     end
   end
 
   describe 'bun:install:vite' do
-    let(:initializers_dir) { 'config/initializers' }
     let(:bin_dir) { 'bin' }
-    let(:vite_binstub) { 'bin/vite' }
-    let(:vite_backup) { 'bin/vite-backup' }
-    let(:vite_initializer) { 'config/initializers/bundlebun-vite.rb' }
-    let(:template_dir) { File.expand_path('../templates', __dir__) }
-    let(:vite_template_dir) { File.join(template_dir, 'vite-ruby') }
+    let(:config_dir) { 'config' }
+    let(:vite_binstub) { 'bin/bun-vite' }
+    let(:vite_cmd_binstub) { 'bin/bun-vite.cmd' }
+    let(:vite_config) { 'config/vite.json' }
+    let(:source_content) { "#!/usr/bin/env ruby\nputs 'hello'" }
 
     before do
       allow(File).to receive(:exist?).with('bin/bun').and_return(true)
-      allow(File).to receive(:directory?).with(initializers_dir).and_return(true)
 
-      allow(File).to receive(:expand_path).with('../templates/vite-ruby/vite', anything)
-        .and_return(File.join(vite_template_dir, 'vite'))
-      allow(File).to receive(:expand_path).with('../templates/vite-ruby/bundlebun-vite.rb', anything)
-        .and_return(File.join(vite_template_dir, 'bundlebun-vite.rb'))
+      allow(Gem).to receive(:win_platform?).and_return(false)
+
+      allow(File).to receive(:expand_path).with('../templates/vite-ruby/bun-vite', anything)
+        .and_return('/source/path')
+      allow(File).to receive(:expand_path).with('../templates/vite-ruby/vite.json', anything)
+        .and_return('/source/path/vite.json')
+
+      allow(File).to receive(:read).with('/source/path').and_return(source_content)
+
+      allow(FileUtils).to receive(:chmod)
+      allow(FileUtils).to receive(:cp)
     end
 
-    context 'when performing fresh installation' do
+    context 'when no files exist' do
       before do
         allow(File).to receive(:exist?).with(vite_binstub).and_return(false)
-        allow(File).to receive(:exist?).with(vite_initializer).and_return(false)
+        allow(File).to receive(:exist?).with(vite_config).and_return(false)
       end
 
-      it 'creates both binstub and initializer' do
+      it 'creates the binstub' do
         expect(FileUtils).to receive(:mkdir_p).with(bin_dir)
-        expect(FileUtils).to receive(:cp).with(
-          File.join(vite_template_dir, 'vite'),
-          vite_binstub
-        )
-        expect(FileUtils).to receive(:cp).with(
-          File.join(vite_template_dir, 'bundlebun-vite.rb'),
-          vite_initializer
-        )
+        expect(File).to receive(:write).with(vite_binstub, source_content, mode: "w")
         expect(FileUtils).to receive(:chmod).with(0o755, vite_binstub)
-
         Rake::Task['bun:install:vite'].invoke
+      end
+
+      it 'creates the config file' do
+        expect(FileUtils).to receive(:mkdir_p).with(config_dir)
+        expect(FileUtils).to receive(:cp).with('/source/path/vite.json', vite_config)
+        Rake::Task['bun:install:vite'].invoke
+      end
+
+      context 'on Windows' do
+        before do
+          allow(Gem).to receive(:win_platform?).and_return(true)
+          allow(File).to receive(:exist?).with(vite_cmd_binstub).and_return(false)
+        end
+
+        it 'creates the windows binstub' do
+          expect(FileUtils).to receive(:mkdir_p).with(bin_dir)
+          expect(File).to receive(:write).with(
+            vite_cmd_binstub,
+            "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n#{source_content}",
+            mode: "wb:UTF-8"
+          )
+          Rake::Task['bun:install:vite'].invoke
+        end
       end
     end
 
-    context 'when vite binstub exists without bundlebun mentioned in it' do
+    context 'when binstub exists' do
       before do
         allow(File).to receive(:exist?).with(vite_binstub).and_return(true)
-        allow(File).to receive(:read).with(vite_binstub).and_return('regular vite content')
-        allow(File).to receive(:exist?).with(vite_initializer).and_return(false)
+        allow(File).to receive(:exist?).with(vite_config).and_return(false)
       end
 
-      it 'backs up existing binstub and creates new one' do
-        expect(FileUtils).to receive(:mv).with(vite_binstub, vite_backup)
-        expect(FileUtils).to receive(:cp).with(
-          File.join(vite_template_dir, 'vite'),
-          vite_binstub
-        )
-        expect(FileUtils).to receive(:chmod).with(0o755, vite_binstub)
-        expect(FileUtils).to receive(:cp).with(
-          File.join(vite_template_dir, 'bundlebun-vite.rb'),
-          vite_initializer
-        )
-
+      it 'skips binstub creation' do
+        expect(File).not_to receive(:write).with(vite_binstub, anything, anything)
         Rake::Task['bun:install:vite'].invoke
+      end
+
+      context 'on Windows' do
+        before do
+          allow(Gem).to receive(:win_platform?).and_return(true)
+          allow(File).to receive(:exist?).with(vite_cmd_binstub).and_return(false)
+        end
+
+        it 'still creates the windows binstub' do
+          expect(File).to receive(:write).with(
+            vite_cmd_binstub,
+            "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n#{source_content}",
+            mode: "wb:UTF-8"
+          )
+          Rake::Task['bun:install:vite'].invoke
+        end
       end
     end
 
-    context 'when vite binstub exists with bundlebun mentioned in it' do
+    context 'when windows binstub exists' do
       before do
-        allow(File).to receive(:exist?).with(vite_binstub).and_return(true)
-        allow(File).to receive(:read).with(vite_binstub).and_return('content with bundlebun')
-        allow(File).to receive(:exist?).with(vite_initializer).and_return(false)
-      end
-
-      it 'skips binstub creation but creates initializer' do
-        expect(FileUtils).not_to receive(:mv)
-        expect(FileUtils).not_to receive(:chmod)
-        expect(FileUtils).not_to receive(:cp).with(anything, vite_binstub)
-
-        expect(FileUtils).to receive(:cp).with(
-          File.join(vite_template_dir, 'bundlebun-vite.rb'),
-          vite_initializer
-        )
-
-        Rake::Task['bun:install:vite'].invoke
-      end
-    end
-
-    context 'when initializers directory does not exist' do
-      before do
-        allow(File).to receive(:directory?).with(initializers_dir).and_return(false)
+        allow(Gem).to receive(:win_platform?).and_return(true)
         allow(File).to receive(:exist?).with(vite_binstub).and_return(false)
+        allow(File).to receive(:exist?).with(vite_cmd_binstub).and_return(true)
+        allow(File).to receive(:exist?).with(vite_config).and_return(false)
       end
 
-      it 'creates binstub but skips initializer' do
-        expect(FileUtils).to receive(:mkdir_p).with(bin_dir)
-        expect(FileUtils).to receive(:cp).with(
-          File.join(vite_template_dir, 'vite'),
-          vite_binstub
-        )
-        expect(FileUtils).to receive(:chmod).with(0o755, vite_binstub)
-
-        expect(FileUtils).not_to receive(:cp).with(anything, vite_initializer)
-
+      it 'skips windows binstub creation' do
+        expect(File).not_to receive(:write).with(vite_cmd_binstub, anything, anything)
         Rake::Task['bun:install:vite'].invoke
+      end
+    end
+
+    context 'when config exists' do
+      let(:existing_config) { {'all' => {'existingKey' => 'value'}} }
+
+      before do
+        allow(File).to receive(:exist?).with(vite_binstub).and_return(true)
+        allow(File).to receive(:exist?).with(vite_config).and_return(true)
+        allow(File).to receive(:read).with(vite_config).and_return(JSON.generate(existing_config))
+      end
+
+      it 'updates existing config with viteBinPath' do
+        expected_config = {
+          'all' => {
+            'existingKey' => 'value',
+            'viteBinPath' => 'bin/bun-vite'
+          }
+        }
+        expect(File).to receive(:write).with(
+          vite_config,
+          JSON.pretty_generate(expected_config)
+        )
+        Rake::Task['bun:install:vite'].invoke
+      end
+    end
+
+    context 'when config exists but is invalid JSON' do
+      before do
+        allow(File).to receive(:exist?).with(vite_binstub).and_return(true)
+        allow(File).to receive(:exist?).with(vite_config).and_return(true)
+        allow(File).to receive(:read).with(vite_config).and_return('invalid json')
+      end
+
+      it 'handles the error gracefully' do
+        expect(File).not_to receive(:write).with(vite_config, anything)
+        expect { Rake::Task['bun:install:vite'].invoke }.not_to raise_error
+      end
+
+      it 'outputs an error message' do
+        expect($stdout).to receive(:puts).with(/Failed to parse .+vite\.json, no changes made\./)
+        Rake::Task['bun:install:vite'].invoke
+      end
+    end
+
+    context 'task dependencies' do
+      it 'depends on bun:install' do
+        expect(Rake::Task['bun:install:vite'].prerequisites).to include('install')
       end
     end
   end

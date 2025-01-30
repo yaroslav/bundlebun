@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'fileutils'
+require 'json'
 
 namespace :bun do
   desc 'Install bundlebun: install binstub and detect frameworks'
@@ -16,19 +17,14 @@ namespace :bun do
 
     Rake::Task['bun:install:bin'].invoke
 
-    if defined?(Rails)
-      puts "Rails detected.\n\n"
-      Rake::Task['bun:install:rails'].invoke
+    if defined?(Cssbundling) || defined?(Jsbundling)
+      puts "Rails' cssbundling/jsbundling detected.\n\n"
+      Rake::Task['bun:install:bundling-rails'].invoke
     end
 
     if defined?(ViteRuby)
       puts "vite-ruby detected.\n\n"
       Rake::Task['bun:install:vite'].invoke
-    end
-
-    if defined?(ExecJS)
-      puts "ExecJS detected.\n\n"
-      Rake::Task['bun:install:execjs'].invoke
     end
   end
 
@@ -39,15 +35,31 @@ namespace :bun do
     source = File.expand_path('../../exe/bundlebun', __dir__)
     target_dir = 'bin'
     target = File.join(target_dir, 'bun')
+    content = File.read(source)
 
     if File.exist?(target)
       puts "#{target} already exists."
     else
       FileUtils.mkdir_p(target_dir)
-      FileUtils.cp(source, target)
+      File.write(target, content, mode: "w")
       FileUtils.chmod(0o755, target)
 
       puts "Installed binstub at #{target}."
+    end
+
+    # We're using Bundler technique to generate the .cmd wrappers on
+    # Windows (as Windows cannot run files with shebangs, of course).
+    # There is no public API for generating binstubs (I wish), so that's a copy and paste.
+    # @see https://github.com/rubygems/rubygems/blob/186a4f24789e6e7fd967b290ce93ed5886ef22d8/bundler/lib/bundler/installer.rb#L137
+    if Gem.win_platform?
+      cmd_target = "#{target}.cmd"
+      if File.exist?(cmd_target)
+        puts "#{cmd_target} already exists."
+      else
+        prefix = "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n"
+        File.write(cmd_target, prefix + content, mode: "wb:UTF-8")
+        puts "Installed Windows binstub at #{cmd_target}"
+      end
     end
 
     puts <<~MESSAGE
@@ -58,18 +70,20 @@ namespace :bun do
     MESSAGE
   end
 
-  desc 'Install bundlebun: Rails, cssbundling-rails, jsbundling-rails integration'
-  task 'install:rails' => :install do
-    puts "Installing Rails integration...\n\n"
+  desc 'Install bundlebun: cssbundling-rails, jsbundling-rails integration'
+  task 'install:bundling-rails' => :install do
+    puts "Installing cssbundling/jsbundling Rails integration...\n\n"
 
-    assets_rake = File.expand_path('../templates/rails/bundlebun.rake', __dir__)
+    assets_rake = File.expand_path('../templates/bundling-rails/bundlebun.rake', __dir__)
     target_dir = 'lib/tasks'
     target = File.join(target_dir, 'bundlebun.rake')
 
-    if FileUtils.mkdir_p(target_dir) && FileUtils.cp(assets_rake, target)
-      puts "Installed an initializer with overrides for cssbundling-rails and jsbundling-rails at #{target}"
-    else
+    if File.exist?(target)
       puts "#{target} already exists."
+    else
+      FileUtils.mkdir_p(target_dir)
+      FileUtils.cp(assets_rake, target)
+      puts "Installed an initializer with overrides for cssbundling-rails and jsbundling-rails at #{target}"
     end
 
     puts <<~MESSAGE
@@ -97,75 +111,60 @@ namespace :bun do
   task 'install:vite' => :install do
     puts "Installing vite-ruby integration...\n\n"
 
-    binstub = File.expand_path('../templates/vite-ruby/vite', __dir__)
+    binstub = File.expand_path('../templates/vite-ruby/bun-vite', __dir__)
     target_dir = 'bin'
-    initializers_dir = 'config/initializers'
-    target = File.join(target_dir, 'vite')
-    backup = File.join(target_dir, 'vite-backup')
-    initializer = File.expand_path('../templates/vite-ruby/bundlebun-vite.rb', __dir__)
-    initializer_target = File.join(initializers_dir, 'bundlebun-vite.rb')
+    target = File.join(target_dir, 'bun-vite')
+    content = File.read(binstub)
 
-    if File.exist?(target) && File.read(target).include?('bundlebun')
+    config = File.expand_path('../templates/vite-ruby/vite.json', __dir__)
+    config_target_dir = 'config'
+    config_target = File.join(config_target_dir, 'vite.json')
+
+    if File.exist?(target)
       puts "#{target} already exists."
-    elsif File.exist?(target)
-      puts "Copying #{target} to #{backup} for backup"
-      FileUtils.mv(target, backup)
-
-      FileUtils.cp(binstub, target)
-      FileUtils.chmod(0o755, target)
-      puts "Installed a vite-ruby + bundlebun binstub at #{target}"
     else
       FileUtils.mkdir_p(target_dir)
-      FileUtils.cp(binstub, target)
+      File.write(target, content, mode: "w")
       FileUtils.chmod(0o755, target)
       puts "Installed a vite-ruby + bundlebun binstub at #{target}"
     end
 
-    if File.directory?(initializers_dir)
-      if File.exist?(initializer_target)
-        puts "#{initializer_target} already exists."
+    # See above for notes on `.cmd`-file generation.
+    if Gem.win_platform?
+      cmd_target = "#{target}.cmd"
+      if File.exist?(cmd_target)
+        puts "#{cmd_target} already exists."
       else
-        FileUtils.cp(initializer, initializer_target)
-        puts "Installed a Rails initializer for vite-ruby at #{initializer_target}."
+        prefix = "@ruby -x \"%~f0\" %*\n@exit /b %ERRORLEVEL%\n\n"
+        File.write(cmd_target, prefix + content, mode: "wb:UTF-8")
+        puts "Installed Windows binstub at #{cmd_target}"
+      end
+    end
+
+    if File.exist?(config_target)
+      puts "#{config_target} already exists."
+
+      begin
+        json = JSON.parse(File.read(config_target))
+        # Injecting our binstub
+        json['all'] ||= {}
+        json['all']['viteBinPath'] = 'bin/bun-vite'
+
+        File.write(config_target, JSON.pretty_generate(json))
+      rescue
+        puts "Failed to parse #{config_target}, no changes made."
       end
     else
-      puts "Directory #{initializers_dir} does not seem to exist; not installing a Rails initializer."
+      FileUtils.mkdir_p(config_target_dir)
+      FileUtils.cp(config, config_target)
+      puts "Installed sample vite-ruby + bundlebun config at #{config_target}"
     end
 
     puts <<~MESSAGE
       We've installed a binstub for running vite-ruby with bundlebun enabled at #{target}.
-      vite-ruby should now use this patched binstub to use `bin/bun` with bundlebun as a JavaScript runtime. Additionally, we've tried to install a Rails initializer at
-      #{initializer_target} to help vite-ruby work with bundlebun.
+      Use this binstub to force bundlebun with Vite as a JavaScript runtime. Additionally, we've installed (or updated!) a vite-ruby configuration file at #{config_target} to use that binstub.
 
-      Be sure to replace `bun` with `bin/bun` in any existing and generated build-related files such as `Procfile` or `Procfile.dev`, `package.json` and others.
-
-      Bun.
-
-    MESSAGE
-  end
-
-  desc 'Install bundlebun: ExecJS integration'
-  task 'install:execjs' => :install do
-    puts "Installing ExecJS integration...\n\n"
-
-    initializers_dir = 'config/initializers'
-    initializer = File.expand_path('../templates/execjs/bundlebun-execjs.rb', __dir__)
-    initializer_target = File.join(initializers_dir, 'bundlebun-execjs.rb')
-
-    if File.directory?(initializers_dir)
-      if File.exist?(initializer_target)
-        puts "#{initializer_target} already exists."
-      else
-        FileUtils.cp(initializer, initializer_target)
-        puts "Installed a Rails initializer for ExecJS at #{initializer_target}."
-      end
-    else
-      puts "Directory #{initializers_dir} does not seem to exist; not installing a Rails initializer."
-    end
-
-    puts <<~MESSAGE
-      We've installed a Rails initializer that re-defines the Bun runtime for ExecJS and
-      sets Bun as a default runtime.
+      Be sure to replace `bun` with `bin/bun` in any existing build-related files such as `Procfile` or `Procfile.dev`, `package.json` and others.
 
       Bun.
 

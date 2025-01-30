@@ -30,9 +30,20 @@ module Bundlebun
 
       # A relative path to binstub that bundlebun usually generates with installation Rake tasks.
       #
+      # For Windows, the binstub path will return the `bun.cmd` wrapper.
+      #
       # @return [String]
       def binstub_path
-        BINSTUB_PATH
+        Bundlebun::Platform.windows? ? "#{BINSTUB_PATH}.cmd" : BINSTUB_PATH
+      end
+
+      # A full path to binstub that bundlebun usually generates with installation Rake tasks.
+      #
+      # For Windows, that will use the `bun.cmd` wrapper.
+      #
+      # @return [String]
+      def full_binstub_path
+        File.expand_path(binstub_path)
       end
 
       # A relative directory path to the bundled Bun executable from the root of the gem.
@@ -46,7 +57,9 @@ module Bundlebun
       #
       # @return [String]
       def full_directory
-        File.expand_path("../../#{relative_directory}", __dir__)
+        return @full_directory if defined?(@full_directory)
+
+        @full_directory = File.expand_path("../../#{relative_directory}", __dir__)
       end
 
       # A full path to the bundled Bun binary we run
@@ -54,8 +67,10 @@ module Bundlebun
       #
       # @return [String]
       def binary_path
-        executable = "bun#{RUBY_PLATFORM.match?(/mingw|mswin/) ? ".exe" : ""}"
-        File.join(full_directory, executable)
+        return @binary_path if defined?(@binary_path)
+
+        executable = "bun#{Bundlebun::Platform.windows? ? ".exe" : ""}"
+        @binary_path = File.join(full_directory, executable)
       end
 
       # Does the bundled Bun binary exist?
@@ -67,12 +82,12 @@ module Bundlebun
 
       # Returns the preferred way to run Bun when bundlebun is installed.
       #
-      # If the binstub is installed (see binstub_path), use the binstub.
+      # If the binstub is installed (see binstub_path), use the full path to binstub.
       # If not, use the full binary path for the bundled executable (binary_path).
       #
       # @return [String]
       def binstub_or_binary_path
-        binstub_exist? ? binstub_path : binary_path
+        binstub_exist? ? full_binstub_path : binary_path
       end
 
       # Does the binstub exist?

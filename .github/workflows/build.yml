@@ -178,7 +178,7 @@ jobs:
 
   test-windows:
     needs: build
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - uses: actions/download-artifact@v3
         with:

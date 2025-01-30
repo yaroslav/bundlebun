@@ -5,6 +5,7 @@ ruby_version: 3.0
 ignore:
   - "spec/**/*":
       - Metrics/BlockLength
+      - Lint/ConstantDefinitionInBlock
   - "tasks/**/*":
       - Style/Documentation
   - "**/*":

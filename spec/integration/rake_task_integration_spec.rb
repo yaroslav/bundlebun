@@ -16,7 +16,13 @@ RSpec.describe 'rake bun integration', type: :integration do
 
   it 'successfully executes the binary through rake task and returns a result' do
     Dir.chdir(tmp_dir) do
-      output, status = Open3.capture2e(%{rake "bun[-e 'console.log\\(2+2\\)'"]})
+      command = if Bundlebun::Platform.windows?
+        'rake "bun[-e \"console.log(2+2)\"]"'
+      else
+        %{rake "bun[-e 'console.log\\(2+2\\)']"}
+      end
+
+      output, status = Open3.capture2e(command)
       expect(status).to be_success
       expect(output.strip).to eq('4')
     end

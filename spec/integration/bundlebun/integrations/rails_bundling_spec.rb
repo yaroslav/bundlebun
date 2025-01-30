@@ -10,7 +10,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
   before(:each) do
     Dir.chdir(tmp_dir) do
       Bundler.with_unbundled_env do
-        # Create initial Gemfile with Rails
         File.write('Gemfile', <<~RUBY)
           source 'https://rubygems.org'
           gem 'rails'
@@ -18,7 +17,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         _output, status = capture("bundle install && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
         expect(status).to be_success
 
-        # Update Gemfile with our gems
         File.write('Gemfile', <<~RUBY, mode: 'a+')
           gem 'cssbundling-rails'
           gem 'jsbundling-rails'
@@ -32,15 +30,15 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         FileUtils.mkdir_p('app/assets/builds')
         FileUtils.mkdir_p('app/javascript')
 
+        # Install bundlebun
+        _output, status = capture("bundle exec rake bun:install")
+        expect(status).to be_success
+
         # Install CSS and JS bundling
         _output, status = capture("bundle exec rails css:install:postcss")
         expect(status).to be_success
 
         _output, status = capture("bundle exec rails javascript:install:bun")
-        expect(status).to be_success
-
-        # Install bundlebun
-        _output, status = capture("bundle exec rake bun:install")
         expect(status).to be_success
 
         # Add Bun version check plugin for CSS
@@ -94,6 +92,8 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
 
   describe 'CSS building' do
     it 'successfully builds CSS using Bun' do
+      skip('Not testing cssbundling/PostCSS with Bun on Windows, see https://github.com/oven-sh/bun/issues/16907') if Bundlebun::Platform.windows?
+
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
           _output, status = capture("bundle exec rake css:build")
@@ -101,7 +101,6 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
 
           css_path = 'app/assets/builds/application.css'
           expect(File).to exist(css_path)
-
           css_content = File.read(css_path)
           expect(css_content).to match(/Built with Bun \d+\.\d+\.\d+/)
         end

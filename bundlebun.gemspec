@@ -34,4 +34,5 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = ['README.md']
   spec.require_paths = ['lib']
   spec.add_runtime_dependency 'zeitwerk'
+  spec.add_runtime_dependency 'json'
 end

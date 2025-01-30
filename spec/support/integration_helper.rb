@@ -5,7 +5,7 @@
 RSpec.configure do |config|
   config.before(:each, type: :integration) do
     unless Bundlebun::Runner.binary_path_exist?
-      skip('Bun binary is not downloaded, download with `rake bundlebun:download` first')
+      skip('Bun binary is not downloaded, download it using `rake bundlebun:download` first')
     end
   end
 end
@@ -15,8 +15,12 @@ def capture(cmd)
     'BUNDLE_GEMFILE' => File.join(tmp_dir, 'Gemfile'),
     'BUNDLE_PATH' => File.join(tmp_dir, 'vendor/bundle'),
     'BUNDLE_APP_CONFIG' => File.join(tmp_dir, '.bundle'),
-    'BUNDLE_DISABLE_SHARED_GEMS' => 'true',
-    'PATH' => "#{File.join(tmp_dir, "bin")}:#{File.join(tmp_dir, "vendor/bundle/bin")}:#{ENV["PATH"]}"
+    'BUNDLE_DISABLE_SHARED_GEMS' => 'true'
   }
-  Open3.capture2e(env, cmd)
+
+  path_separator = Bundlebun::Platform.windows? ? ';' : ':'
+  env['PATH'] = [File.join(tmp_dir, "bin"), ENV["PATH"]].join(path_separator)
+
+  output, status = Open3.capture2e(env, cmd)
+  [output, status]
 end

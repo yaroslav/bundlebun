@@ -29,7 +29,18 @@ RSpec.describe Bundlebun::Runner do
     context 'on Unix-like systems' do
       before do
         allow(described_class).to receive(:binary_path).and_call_original
-        stub_const('RUBY_PLATFORM', 'x86_64-linux')
+
+        stub_const('RbConfig', Module.new)
+        stub_const('RbConfig::CONFIG', {
+          'host_os' => 'darwin19.0.0'
+        })
+        Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+        described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+      end
+
+      after do
+        Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+        described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
       end
 
       it 'returns path with bun binary' do
@@ -40,7 +51,18 @@ RSpec.describe Bundlebun::Runner do
     context 'on Windows' do
       before do
         allow(described_class).to receive(:binary_path).and_call_original
-        stub_const('RUBY_PLATFORM', 'mswin')
+
+        stub_const('RbConfig', Module.new)
+        stub_const('RbConfig::CONFIG', {
+          'host_os' => 'mingw32'
+        })
+        Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+        described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+      end
+
+      after do
+        Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+        described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
       end
 
       it 'returns path with bun.exe binary' do
@@ -62,13 +84,51 @@ RSpec.describe Bundlebun::Runner do
   end
 
   describe 'binstub handling' do
-    it 'returns the binstub path' do
-      expect(described_class.binstub_path).to eq('bin/bun')
+    context 'with binstub path' do
+      context 'on Windows' do
+        before do
+          stub_const('RbConfig', Module.new)
+          stub_const('RbConfig::CONFIG', {
+            'host_os' => 'mingw32'
+          })
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        after do
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        it 'returns the binstub path as-is on Windows' do
+          expect(described_class.binstub_path).to eq('bin/bun.cmd')
+        end
+      end
+
+      context 'on Unix-like systems' do
+        before do
+          stub_const('RbConfig', Module.new)
+          stub_const('RbConfig::CONFIG', {
+            'host_os' => 'darwin19.0.0'
+          })
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        after do
+          Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
+          described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+        end
+
+        it 'returns the binstub path as-is on Unix-like systems' do
+          expect(described_class.binstub_path).to eq('bin/bun')
+        end
+      end
     end
 
     context 'when binstub exists' do
       before do
-        allow(File).to receive(:exist?).with('bin/bun').and_return(true)
+        allow(File).to receive(:exist?).and_return(true)
       end
 
       it 'returns true' do
@@ -78,7 +138,7 @@ RSpec.describe Bundlebun::Runner do
 
     context 'when binstub does not exist' do
       before do
-        allow(File).to receive(:exist?).with('bin/bun').and_return(false)
+        allow(File).to receive(:exist?).and_return(false)
       end
 
       it 'returns false' do
@@ -86,22 +146,33 @@ RSpec.describe Bundlebun::Runner do
       end
     end
 
+    describe 'with full binstub path' do
+      before do
+        allow(File).to receive(:expand_path).and_call_original
+      end
+
+      it 'returns absolute path for binstub' do
+        expect(described_class.full_binstub_path).to eq(File.expand_path(described_class.binstub_path))
+      end
+    end
+
     describe 'returning binstub or true binary path' do
       let(:binary_path) { described_class.binary_path }
+      let(:full_binstub_path) { described_class.full_binstub_path }
 
       context 'when binstub exists' do
         before do
-          allow(File).to receive(:exist?).with('bin/bun').and_return(true)
+          allow(File).to receive(:exist?).and_return(true)
         end
 
-        it 'returns binstub path' do
-          expect(described_class.binstub_or_binary_path).to eq('bin/bun')
+        it 'returns full binstub path' do
+          expect(described_class.binstub_or_binary_path).to eq(full_binstub_path)
         end
       end
 
       context 'when binstub does not exist' do
         before do
-          allow(File).to receive(:exist?).with('bin/bun').and_return(false)
+          allow(File).to receive(:exist?).and_return(false)
         end
 
         it 'returns binary path' do
