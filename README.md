@@ -104,6 +104,11 @@ Usually, if you've placed `gem 'bundlebun'` after your frontend-related gems in 
 
 Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`: more on that below.
 
+By default, on load, bundlebun:
+
+- tries to detect and load all possible integrations
+- adds the path to the bundled `bun` executable to the start of your application's `PATH`
+
 #### Ruby on Rails: cssbundling and jsbundling
 
 [cssbundling](https://github.com/rails/cssbundling-rails) and [jsbundling](https://github.com/rails/jsbundling-rails) are Rails gems that support the traditional CSS and JS building pipeline for Ruby on Rails.
