@@ -43,15 +43,22 @@ module Bundlebun
       end
     end
 
-    def prepend_to_path # @private
+    # Prepend the path to the bundled Bun executable to `PATH`.
+    #
+    # @see Bundlebun::Runner.full_directory
+    def prepend_to_path
       EnvPath.prepend(Runner.full_directory)
     end
 
-    def load_tasks # @private
+    # Load included Rake tasks (like `bun:install`).
+    def load_tasks
       Dir[File.expand_path('tasks/*.rake', __dir__)].each { |task| load task }
     end
 
-    def load_integrations # @private
+    # Detect and load all integrations (monkey-patches).
+    #
+    # @see Bundlebun::Integrations
+    def load_integrations
       Integrations.bun!
     end
 
