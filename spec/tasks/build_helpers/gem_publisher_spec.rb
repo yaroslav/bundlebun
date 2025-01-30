@@ -6,7 +6,7 @@ RSpec.describe BuildHelpers::GemPublisher do
   let(:version) { '0.1.0.1.0.0' }
   let(:github_client) { instance_double(Octokit::Client) }
   let(:version_checker) { instance_double(BuildHelpers::BunVersion) }
-  let(:release) { OpenStruct.new(url: 'https://api.github.com/repos/user/repo/releases/1') }
+  let(:release) { instance_double('Release', url: 'https://api.github.com/repos/user/repo/releases/1') }
   let(:publisher) { described_class.new(version) }
   let(:gem_files) { ['bundlebun-0.1.0.1.0.0-x86_64-linux.gem'] }
   let(:tag) { "bundlebun-v#{version}" }

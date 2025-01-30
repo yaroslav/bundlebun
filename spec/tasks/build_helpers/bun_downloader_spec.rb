@@ -3,11 +3,10 @@
 require_relative '../../../tasks/build_helpers'
 
 require 'octokit'
-require 'ostruct'
 
 RSpec.describe BuildHelpers::BunDownloader do
   let(:github_client) { instance_double(Octokit::Client) }
-  let(:release) { OpenStruct.new(tag_name: 'bun-v1.0.0') }
+  let(:release) { instance_double('Release', tag_name: 'bun-v1.0.0') }
   let(:zip_entry) { instance_double(Zip::Entry, name: 'bun') }
   let(:zip_file) { instance_double(Zip::File) }
   let(:temp_file) { instance_double(Tempfile, path: '/tmp/fake.zip', unlink: true) }
