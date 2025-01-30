@@ -98,16 +98,16 @@ _Windows tip:_ If you're on Windows, the `bin\bun.cmd` file will be created. If 
 
 Next, the Rake task will try to detect the integrations we need to install based on the classes and modules Rake can see in your project. We'll continue with integrations.
 
+**By default, on load, bundlebun:**
+
+- adds the path to the bundled `bun` executable to the start of your application's `PATH`. That simplifies the integration in cases where we don't really need to monkey-patch a lot of code, and we just need to make sure it "sees" our `bun` executable as available.
+- tries to detect and load all possible integrations.
+
 ### Integrations
 
 Usually, if you've placed `gem 'bundlebun'` after your frontend-related gems in the `Gemfile`, and did `rake bun:install`, the integrations should all be working out of the box.
 
 Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`: more on that below.
-
-By default, on load, bundlebun:
-
-- tries to detect and load all possible integrations
-- adds the path to the bundled `bun` executable to the start of your application's `PATH`
 
 #### Ruby on Rails: cssbundling and jsbundling
 
