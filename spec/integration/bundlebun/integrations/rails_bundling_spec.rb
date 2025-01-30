@@ -92,6 +92,8 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
 
   describe 'CSS building' do
     it 'successfully builds CSS using Bun' do
+      skip('Not testing cssbundling/PostCSS with Bun on Windows, see https://github.com/oven-sh/bun/issues/16907') if Bundlebun::Platform.windows?
+
       Dir.chdir(tmp_dir) do
         Bundler.with_unbundled_env do
           _output, status = capture("bundle exec rake css:build")
