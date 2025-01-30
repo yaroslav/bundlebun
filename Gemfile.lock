@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     bundlebun (0.1.2)
+      json
       zeitwerk
 
 GEM
@@ -114,14 +115,15 @@ GEM
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
-    irb (1.14.3)
+    irb (1.15.1)
+      pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jsbundling-rails (1.3.1)
       railties (>= 6.0.0)
     json (2.9.1)
-    language_server-protocol (3.17.0.3)
-    lefthook (1.10.9)
+    language_server-protocol (3.17.0.4)
+    lefthook (1.10.10)
     lint_roller (1.1.0)
     logger (1.6.5)
     loofah (2.24.0)
@@ -169,6 +171,9 @@ GEM
     parser (3.3.7.0)
       ast (~> 2.4.1)
       racc
+    pp (0.6.2)
+      prettyprint
+    prettyprint (0.2.0)
     psych (5.2.3)
       date
       stringio
@@ -242,7 +247,7 @@ GEM
       rubocop-ast (>= 1.36.2, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.37.0)
+    rubocop-ast (1.38.0)
       parser (>= 3.3.1.0)
     rubocop-performance (1.23.1)
       rubocop (>= 1.48.1, < 2.0)
@@ -303,7 +308,6 @@ DEPENDENCIES
   execjs
   faraday-retry
   jsbundling-rails
-  json
   lefthook
   octokit
   rails
