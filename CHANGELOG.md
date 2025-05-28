@@ -1,3 +1,7 @@
+## [0.2.1] - 2025-05-28
+
+- Update dependencies
+
 ## [0.2.0] - 2025-01-30
 
 - It is now recommended to include `gem bundlebun` after other existing frontend-related gems in your `Gemfile`. That removes the need to install one-liner initializer monkeypatches for most cases. The gem detects and loads all integrations when loaded. Alternatively, the developer can call integration monkey-patches (`Bundlebun::Integrations::Something.bun!`) directly.

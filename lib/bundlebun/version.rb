@@ -8,5 +8,5 @@ module Bundlebun
   # a Bun runtime with version `1.1.38`.
   #
   # This constant always points to the "own" version of the gem.
-  VERSION = '0.2.0'
+  VERSION = '0.2.1'
 end
