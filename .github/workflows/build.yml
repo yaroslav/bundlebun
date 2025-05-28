@@ -72,6 +72,7 @@ jobs:
       - name: Test
         run: |
           docker run --rm -v $PWD:/gems ruby:3.4-slim bash -c "\
+          apt-get update && apt-get install -y build-essential && \
           cd /gems && \
           mkdir test && cd test && \
           bundle init && \
@@ -101,6 +102,7 @@ jobs:
       - name: Test
         run: |
           docker run --rm --platform linux/arm64 -v $PWD:/gems ruby:3.4-slim bash -c "\
+          apt-get update && apt-get install -y build-essential && \
           cd /gems && \
           mkdir test && cd test && \
           bundle init && \
