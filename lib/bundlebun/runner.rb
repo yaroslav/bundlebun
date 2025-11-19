@@ -69,7 +69,7 @@ module Bundlebun
       def binary_path
         return @binary_path if defined?(@binary_path)
 
-        executable = "bun#{Bundlebun::Platform.windows? ? ".exe" : ""}"
+        executable = "bun#{".exe" if Bundlebun::Platform.windows?}"
         @binary_path = File.join(full_directory, executable)
       end
 
