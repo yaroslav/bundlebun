@@ -122,7 +122,7 @@ jobs:
 
   test-darwin-arm64:
     needs: build
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
@@ -151,7 +151,7 @@ jobs:
 
   test-darwin-x64:
     needs: build
-    runs-on: macos-13
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
