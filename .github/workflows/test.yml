@@ -11,9 +11,9 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - "3.3.7"
-          - "3.2.6"
-          - "3.4.1"
+          - "3.3.10"
+          - "3.2.9"
+          - "3.4.7"
 
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4.1"
+          ruby-version: "3.4.7"
           bundler-cache: true
           bundler: latest
         env:
