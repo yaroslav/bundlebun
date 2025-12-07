@@ -25,7 +25,7 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
           require 'bundlebun'
         RUBY
 
-        _install_output, install_status = capture("cd #{tmp_dir} && bundle install && bundle exec vite install && bundle exec rake bun:install && bundle exec rake bun:install:vite && bundle exec ./bin/bun install")
+        _install_output, install_status = capture("cd #{tmp_dir} && bundle install && bundle binstubs vite_ruby && bundle exec vite install && bundle exec rake bun:install && bundle exec rake bun:install:vite && bundle exec ./bin/bun install")
         expect(install_status).to be_success
 
         FileUtils.mkdir_p('src')
@@ -59,7 +59,7 @@ RSpec.describe Bundlebun::Integrations::ViteRuby, type: :integration do
         JS
         File.write('src/main.js', "console.log('Hi.')")
 
-        output, status = capture("cd #{tmp_dir} && bundle exec bin/vite build")
+        output, status = capture("cd #{tmp_dir} && bundle exec ./bin/vite build")
         expect(status).to be_success
         expect(output.to_s).to match(/Bun version: \d+\.\d+\.\d+/)
       end

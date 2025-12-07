@@ -14,7 +14,7 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
           source 'https://rubygems.org'
           gem 'rails'
         RUBY
-        _output, status = capture("bundle install && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
+        _output, status = capture("bundle install && bundle binstubs rails && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
         expect(status).to be_success
 
         File.write('Gemfile', <<~RUBY, mode: 'a+')
@@ -31,7 +31,7 @@ RSpec.describe 'Rails bundling integrations', type: :integration do
         FileUtils.mkdir_p('app/javascript')
 
         # Install bundlebun
-        _output, status = capture("bundle exec rake bun:install")
+        _output, status = capture("bundle binstubs rake && bundle exec rake bun:install")
         expect(status).to be_success
 
         # Install CSS and JS bundling
