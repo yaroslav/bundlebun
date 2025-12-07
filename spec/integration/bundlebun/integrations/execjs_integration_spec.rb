@@ -15,7 +15,7 @@ RSpec.describe 'ExecJS integration', type: :integration do
           source 'https://rubygems.org'
           gem 'rails'
         RUBY
-        _output, status = capture("bundle install && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
+        _output, status = capture("bundle install && bundle binstubs rails && bundle exec rails new . --skip-git --skip-test --skip-system-test --skip-bootsnap --skip-bundle --force")
         expect(status).to be_success
 
         File.write('Gemfile', <<~RUBY, mode: 'a+')
@@ -26,7 +26,7 @@ RSpec.describe 'ExecJS integration', type: :integration do
         expect(status).to be_success
 
         # Install bundlebun
-        _output, status = capture("bundle exec rake bun:install")
+        _output, status = capture("bundle binstubs rake && bundle exec rake bun:install")
         expect(status).to be_success
       end
     end
