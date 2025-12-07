@@ -1,4 +1,4 @@
-## Unreleased
+## [0.2.2] - 2025-12-07
 
 - Bundler 4.0 spec fixes
 - Update dependencies
