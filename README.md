@@ -9,6 +9,21 @@
   <img src="https://raw.githubusercontent.com/yaroslav/bundlebun/refs/heads/main/assets/mr-bundlebun-512.png" width="256" height="256" alt="Mr. Bundlebun">
 </div>
 
+## Rationale
+
+**Modern frontend setup is needlessly complex** and may involve a lot of maintenance. Developers need _at the very least_ a JavaScript runtime (typically, Node.js), a package manager (could be npm, yarn, or pnpm), and a build tool (Vite, Webpack, esbuild, Parcel—dozens of them).
+
+- One way forward is to dockerize development environments, creating unnecessary headaches for the development team—both frontend and backend engineers (especially if the team is not that large and the project is not that complex).
+- Another approach is to declare front-ops bankruptcy and pursue the "no-build" route.
+
+**What if we could simplify this?** **Bun** is a **JavaScript runtime**, optimized for speed and developer experience. Bun is _also_ a fast JavaScript **package manager**. Bun is _also_ a **build tool**. Bun is also distributed as a single executable file.
+
+However, Bun still requires [some installation](https://bun.sh/docs/installation), and we need to make sure everyone on the team is using the same version.
+
+So, how about we just pack it into a Ruby gem as a binary and allow developers to stay updated? Then, we'll be ready every time a new Bun version is out—or the user can freeze their desired version within their Ruby project. There are no setups, large READMEs with instructions, and no enforcing the Docker workflow.
+
+**Enter bundlebun**. With a fast JavaScript runtime and a package manager included, you can even skip the build tool and use Bun itself.
+
 ## Quickstart
 
 Starting with your Ruby or Rails project, no Bun or anything like that required:
@@ -27,21 +42,6 @@ Bun is a fast JavaScript runtime, package manager, bundler, and test runner. (1.
 Usage: bun <command> [...flags] [...args]
 ...
 ```
-
-## Rationale
-
-**Modern frontend setup is needlessly complex** and may involve a lot of maintenance. Developers need _at the very least_ a JavaScript runtime (typically, Node.js), a package manager (could be npm, yarn, or pnpm), and a build tool (Vite, Webpack, esbuild, Parcel—dozens of them).
-
-- One way forward is to dockerize development environments, creating unnecessary headaches for the development team—both frontend and backend engineers (especially if the team is not that large and the project is not that complex).
-- Another approach is to declare front-ops bankruptcy and pursue the "no-build" route.
-
-**What if we could simplify this?** **Bun** is a **JavaScript runtime**, optimized for speed and developer experience. Bun is _also_ a fast JavaScript **package manager**. Bun is _also_ a **build tool**. Bun is also distributed as a single executable file.
-
-However, Bun still requires [some installation](https://bun.sh/docs/installation), and we need to make sure everyone on the team is using the same version.
-
-So, how about we just pack it into a Ruby gem as a binary and allow developers to stay updated? Then, we'll be ready every time a new Bun version is out—or the user can freeze their desired version within their Ruby project. There are no setups, large READMEs with instructions, and no enforcing the Docker workflow.
-
-**Enter bundlebun**. With a fast JavaScript runtime and a package manager included, you can even skip the build tool and use Bun itself.
 
 ## Install
 
