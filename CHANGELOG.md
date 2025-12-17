@@ -1,3 +1,8 @@
+## [0.2.3] - 2025-12-17
+
+- Update dependencies
+- Minor documentation changes
+
 ## [0.2.2] - 2025-12-07
 
 - Bundler 4.0 spec fixes
