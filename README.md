@@ -52,6 +52,10 @@ First, add it to your `Gemfile`. Make sure to add it _after_ your existing front
 ```ruby
 # ...
 
+# Frontend-related gems go here
+# For example, Vite integration
+# gem "vite_rails"
+
 gem "bundlebun"
 ```
 
@@ -68,21 +72,7 @@ bundle add bundlebun
 ```
 
 If you're seeing a message like `Could not find gems matching 'bundlebun' valid for all resolution platforms
-(aarch64-linux, aarch64-linux-gnu <...> )`, this may be [a known issue with Bundler/`Gemfile.lock`](https://www.google.com/search?client=firefox-b-d&q=Could+not+find+gems+matching+all+resolution+platforms) which you can fix. Open `Gemfile.lock` in your text editor, find a section called `PLATFORMS`, and alter a list of platforms you need to support. This can be a good default for most if you're targeting Linux and macOS (for Windows, also leave entries with `x64_mingw`):
-
-```
-(rest of the file here)
-
-PLATFORMS
-  aarch64-linux
-  arm64-darwin
-  x86_64-darwin
-  x86_64-linux
-
-(rest of the file here)
-```
-
-... and try `bundle install` again.
+(aarch64-linux, aarch64-linux-gnu <...> )`, [check this article](https://github.com/yaroslav/bundlebun/wiki/Could-not-find-gems-matching-'bundlebun'-valid-for-all-resolution-platforms).
 
 Next, run:
 
@@ -107,7 +97,25 @@ Next, the Rake task will try to detect the integrations we need to install based
 
 Usually, if you've placed `gem 'bundlebun'` after your frontend-related gems in the `Gemfile`, and did `rake bun:install`, the integrations should all be working out of the box.
 
-Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`: more on that below.
+Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`. See the API documentation for that.
+
+#### vite-ruby and vite-rails
+
+[vite-ruby](https://github.com/ElMassimo/vite_ruby) and [vite-rails](https://vite-ruby.netlify.app/) are gems that make Ruby and Rails integration with [Vite](https://vite.dev/), a great JavaScript build tool and platform, seamless and easy.
+
+The bundlebun integration would be installed automatically with `rake bun:install`, or you can run:
+
+```sh
+rake bun:install:vite
+```
+
+That will make sure you have a `bin/bun` binstub. Next, we'll install a custom `bin/bun-vite` binstub to use in build scripts. The installer Rake task will create a new `vite.json` file if it does not exist yet, or force the existing one to use that binstub for building. See the [Vite Ruby configuration manual](https://vite-ruby.netlify.app/config/index.html) for details on `vite.json`.
+
+Make sure you have `gem bundlebun` mentioned _after_ all the vite-related gems in your `Gemfile`. If you want to keep integrations to a minimum, and only enable them manually, use the following to manually turn on the bundlebun monkey-patching for vite-ruby:
+
+```ruby
+Bundlebun::Integrations::ViteRuby.bun!
+```
 
 #### Ruby on Rails: cssbundling and jsbundling
 
@@ -138,24 +146,6 @@ rake bun:install:bundling-rails
 
 The task makes sure a `bin/bun` binstub exists and installs an Rake task hack of sorts to ensure both build-related gems use our bundled version of Bun.
 
-#### vite-ruby and vite-rails
-
-[vite-ruby](https://github.com/ElMassimo/vite_ruby) and [vite-rails](https://vite-ruby.netlify.app/) are gems that make Ruby and Rails integration with [Vite](https://vite.dev/), a great JavaScript build tool and platform, seamless and easy.
-
-The bundlebun integration would be installed automatically with `rake bun:install`, or you can run:
-
-```sh
-rake bun:install:vite
-```
-
-That will make sure you have a `bin/bun` binstub. Next, we'll install a custom `bin/bun-vite` binstub to use in build scripts. The installer Rake task will create a new `vite.json` file if it does not exist yet, or force the existing one to use that binstub for building. See the [Vite Ruby configuration manual](https://vite-ruby.netlify.app/config/index.html) for details on `vite.json`.
-
-Make sure you have `gem bundlebun` mentioned _after_ all the vite-related gems in your `Gemfile`. If you want to keep integrations to a minimum, and only enable them manually, use the following to manually turn on the bundlebun monkey-patching for vite-ruby:
-
-```ruby
-Bundlebun::Integrations::ViteRuby.bun!
-```
-
 #### ExecJS
 
 [ExecJS](https://github.com/rails/execjs) runs JavaScript code straight from Ruby. To do so, it supports a bunch of runtimes it can launch—and get a result. The Bun runtime support already exists for ExecJS; we just need to ensure it uses the bundled one.
@@ -167,14 +157,6 @@ Alternatively, you can load the monkey-patch manually:
 ```ruby
 Bundlebun::Integrations::ExecJS.bun!
 ```
-
-### Notes on `gem install`
-
-bundlebun is designed to be used with Bundler: installed in specific projects, and launched via `bin/bun` or integrations.
-
-If you install the gem globally, you _won't see the `bun` executable_ as a wrapper for a Ruby-bundled Bun runtime; instead, it would be called `bundlebun`.
-
-This naming discrepency is to avoid possible conflicts in your `$PATH` if you have an independent Bun runtime installed: if the directory with Ruby gem-generated binstubs is in your `$PATH` before the directory with your Bun runtime, running `bun` will launch the bundlebun's version, causing a lot of confusion. And that is why bundlebun is _not_ greedy with the `bun` executable name. If you wish to run Bun runtime globally using this gem, a simple symlink or a wrapper script will do, but the gem won't act destructively.
 
 ## Usage
 
@@ -190,10 +172,6 @@ Usage: bun <command> [...flags] [...args]
 
 ...
 ```
-
-### Return codes
-
-Note that with this (or any other option to run Bun), bundlebun will return the error code `127` if the executable is not found.
 
 ### `PATH`
 
@@ -224,12 +202,7 @@ Bundlebun.call("outdated") # => `bun outdated`
 Bundlebun.call(["add", "postcss"]) # => `bun add postcss`
 ```
 
-Check out the [API documentation](https://rubydoc.info/gems/bundlebun) on `Bundlebun::Runner` for helper methods. Some of the most useful ones:
-
-- `Bundlebun::Runner.binary_path`: returns the full path to the bundled Bun library.
-- `Bundlebun::Runner.binary_path_exist?`: checks if that binary even exists.
-- `Bundlebun::Runner.binstub_exist?`: checks if the binstub exists.
-- `Bundlebun::Runner.binstub_or_binary_path`: returns the optimal way to run bundled Bun: a full path to binstub or a full path to the binary.
+Check out the [API documentation](https://rubydoc.info/gems/bundlebun) on `Bundlebun::Runner` for helper methods.
 
 ## Versioning
 
