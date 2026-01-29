@@ -76,6 +76,40 @@ RSpec.describe 'rake bun integration', type: :integration do
     end
   end
 
+  describe 'bun:install:procfile' do
+    it 'migrates Procfile commands to use bin/bun' do
+      Dir.chdir(tmp_dir) do
+        File.write('Procfile', <<~PROCFILE)
+          web: bun run server.ts
+          worker: bunx some-worker
+        PROCFILE
+
+        File.write('Procfile.dev', <<~PROCFILE)
+          web: npm run dev
+          css: npx tailwindcss -w
+        PROCFILE
+
+        _, status = Open3.capture2e('rake bun:install:procfile', stdin_data: "\n\n")
+        expect(status).to be_success
+
+        binstub = Bundlebun::Runner.binstub_path
+        expect(File.read('Procfile')).to eq("web: #{binstub} run server.ts\nworker: #{binstub} x some-worker\n")
+        expect(File.read('Procfile.dev')).to eq("web: #{binstub} run dev\ncss: #{binstub} x tailwindcss -w\n")
+      end
+    end
+
+    it 'preserves Procfiles already using bin/bun' do
+      Dir.chdir(tmp_dir) do
+        File.write('Procfile', "web: bin/bun run server.ts\n")
+
+        _, status = Open3.capture2e('rake bun:install:procfile')
+        expect(status).to be_success
+
+        expect(File.read('Procfile')).to eq("web: bin/bun run server.ts\n")
+      end
+    end
+  end
+
   private
 
   def setup_test_environment

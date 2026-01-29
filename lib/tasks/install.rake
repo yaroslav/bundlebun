@@ -31,6 +31,11 @@ namespace :bun do
       puts "package.json detected.\n\n"
       Rake::Task['bun:install:package'].invoke
     end
+
+    if Dir.glob('Procfile*').any?
+      puts "Procfile detected.\n\n"
+      Rake::Task['bun:install:procfile'].invoke
+    end
   end
 
   desc 'Install bundlebun: create `bin/bun` binstub'
@@ -246,6 +251,55 @@ namespace :bun do
       puts "\nUpdated package.json successfully."
     else
       puts "\nNo changes made."
+    end
+  end
+
+  desc 'Migrate Procfile commands to use bin/bun'
+  task 'install:procfile' do
+    procfiles = Dir.glob('Procfile*')
+
+    if procfiles.empty?
+      puts "No Procfile found in the current directory."
+      next
+    end
+
+    pattern = /\b(bunx|npx|pnpm exec|yarn exec|npm run|yarn run|pnpm run|bun)\b/
+    binstub = Bundlebun::Runner.binstub_path
+    replacements = {
+      'bunx' => "#{binstub} x",
+      'npx' => "#{binstub} x",
+      'pnpm exec' => "#{binstub} x",
+      'yarn exec' => "#{binstub} x",
+      'npm run' => "#{binstub} run",
+      'yarn run' => "#{binstub} run",
+      'pnpm run' => "#{binstub} run",
+      'bun' => binstub
+    }
+
+    procfiles.each do |procfile|
+      content = File.read(procfile)
+      next if content.include?(Bundlebun::Runner::BINSTUB_PATH)
+
+      new_content = content.gsub(pattern) { |match| replacements[match] }
+      next if new_content == content
+
+      puts "Changes for #{procfile}:\n\n"
+      content.lines.zip(new_content.lines).each do |old_line, new_line|
+        if old_line != new_line
+          puts "  - #{old_line}"
+          puts "  + #{new_line}"
+        end
+      end
+
+      print "Apply these changes? [Y/n] "
+      answer = $stdin.gets&.strip&.downcase
+
+      if answer.empty? || answer == 'y' || answer == 'yes'
+        File.write(procfile, new_content)
+        puts "Updated #{procfile} successfully.\n\n"
+      else
+        puts "No changes made to #{procfile}.\n\n"
+      end
     end
   end
 end
