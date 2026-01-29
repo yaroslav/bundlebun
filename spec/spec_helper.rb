@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rake'
+require 'tmpdir'
 require 'webmock/rspec'
 
 require 'bundlebun'

@@ -26,6 +26,16 @@ namespace :bun do
       puts "vite-ruby detected.\n\n"
       Rake::Task['bun:install:vite'].invoke
     end
+
+    if File.exist?('package.json')
+      puts "package.json detected.\n\n"
+      Rake::Task['bun:install:package'].invoke
+    end
+
+    if Dir.glob('Procfile*').any?
+      puts "Procfile detected.\n\n"
+      Rake::Task['bun:install:procfile'].invoke
+    end
   end
 
   desc 'Install bundlebun: create `bin/bun` binstub'
@@ -169,5 +179,127 @@ namespace :bun do
       Bun.
 
     MESSAGE
+  end
+
+  desc 'Migrate package.json scripts to use bin/bun'
+  task 'install:package' do
+    package_json_path = 'package.json'
+
+    unless File.exist?(package_json_path)
+      puts "No package.json found in the current directory."
+      next
+    end
+
+    begin
+      package = JSON.parse(File.read(package_json_path))
+    rescue JSON::ParserError
+      puts "Failed to parse package.json."
+      next
+    end
+
+    scripts = package['scripts']
+    if scripts.nil? || scripts.empty?
+      puts "No scripts found in package.json."
+      next
+    end
+
+    # Order in alternation matters: more specific patterns first
+    pattern = /\b(bunx|npx|pnpm exec|yarn exec|npm run|yarn run|pnpm run|bun)\b/
+    binstub = Bundlebun::Runner.binstub_path
+    replacements = {
+      'bunx' => "#{binstub} x",
+      'npx' => "#{binstub} x",
+      'pnpm exec' => "#{binstub} x",
+      'yarn exec' => "#{binstub} x",
+      'npm run' => "#{binstub} run",
+      'yarn run' => "#{binstub} run",
+      'pnpm run' => "#{binstub} run",
+      'bun' => binstub
+    }
+
+    changes = []
+    scripts.each do |name, value|
+      next unless value.is_a?(String)
+      next if value.include?(Bundlebun::Runner::BINSTUB_PATH)
+
+      new_value = value.gsub(pattern) { |match| replacements[match] }
+      changes << {name: name, old: value, new: new_value} if new_value != value
+    end
+
+    if changes.empty?
+      puts "All scripts in package.json already use bin/bun. No changes needed."
+      next
+    end
+
+    puts "The following changes will be made to package.json scripts:\n\n"
+    changes.each do |change|
+      puts "  #{change[:name]}:"
+      puts "    - #{change[:old]}"
+      puts "    + #{change[:new]}"
+      puts
+    end
+
+    print "Apply these changes? [Y/n] "
+    answer = $stdin.gets&.strip&.downcase
+
+    if answer.empty? || answer == 'y' || answer == 'yes'
+      changes.each do |change|
+        package['scripts'][change[:name]] = change[:new]
+      end
+
+      File.write(package_json_path, JSON.pretty_generate(package) + "\n")
+      puts "\nUpdated package.json successfully."
+    else
+      puts "\nNo changes made."
+    end
+  end
+
+  desc 'Migrate Procfile commands to use bin/bun'
+  task 'install:procfile' do
+    procfiles = Dir.glob('Procfile*')
+
+    if procfiles.empty?
+      puts "No Procfile found in the current directory."
+      next
+    end
+
+    pattern = /\b(bunx|npx|pnpm exec|yarn exec|npm run|yarn run|pnpm run|bun)\b/
+    binstub = Bundlebun::Runner.binstub_path
+    replacements = {
+      'bunx' => "#{binstub} x",
+      'npx' => "#{binstub} x",
+      'pnpm exec' => "#{binstub} x",
+      'yarn exec' => "#{binstub} x",
+      'npm run' => "#{binstub} run",
+      'yarn run' => "#{binstub} run",
+      'pnpm run' => "#{binstub} run",
+      'bun' => binstub
+    }
+
+    procfiles.each do |procfile|
+      content = File.read(procfile)
+      next if content.include?(Bundlebun::Runner::BINSTUB_PATH)
+
+      new_content = content.gsub(pattern) { |match| replacements[match] }
+      next if new_content == content
+
+      puts "Changes for #{procfile}:\n\n"
+      content.lines.zip(new_content.lines).each do |old_line, new_line|
+        if old_line != new_line
+          puts "  - #{old_line}"
+          puts "  + #{new_line}"
+        end
+      end
+
+      print "Apply these changes? [Y/n] "
+      answer = $stdin.gets&.strip&.downcase
+
+      if answer.empty? || answer == 'y' || answer == 'yes'
+        File.write(procfile, new_content)
+        puts "Updated #{procfile} successfully.\n\n"
+      else
+        puts "No changes made to #{procfile}.\n\n"
+      end
+    end
   end
 end

@@ -71,8 +71,8 @@ bundle install
 bundle add bundlebun
 ```
 
-If you're seeing a message like `Could not find gems matching 'bundlebun' valid for all resolution platforms
-(aarch64-linux, aarch64-linux-gnu <...> )`, [check this article](https://github.com/yaroslav/bundlebun/wiki/Could-not-find-gems-matching-'bundlebun'-valid-for-all-resolution-platforms).
+_If you're seeing a message like `Could not find gems matching 'bundlebun' valid for all resolution platforms
+(aarch64-linux, aarch64-linux-gnu <...> )`, [check this article](https://github.com/yaroslav/bundlebun/wiki/Could-not-find-gems-matching-'bundlebun'-valid-for-all-resolution-platforms)._
 
 Next, run:
 
@@ -82,7 +82,9 @@ rake bun:install
 
 The task will install a binstub (`bin/bun`) that you can use to run Bun commands; try running `bin/bun` or `bin/bun --version`.
 
-You should use `bin/bun` in your scripts, including your local runners like `Procfile.dev` or `Procfile`, and `package.json`—if you had a call to `node` or `bun` in the `scripts` section there.
+If `package.json` is present, the installer will offer to migrate your scripts to use `bin/bun` (e.g., `bun` → `bin/bun`, `npx` → `bin/bun x`). You can also run `rake bun:install:package` manually later.
+
+Similarly, if `Procfile` or `Procfile.*` files are present, the installer will offer to migrate those as well. Run `rake bun:install:procfile` manually if needed.
 
 _Windows tip:_ If you're on Windows, the `bin\bun.cmd` file will be created. If you've joined an existing project where only the Unix-like binstub exists at that location, just run `rake bun:install` again.
 
