@@ -46,11 +46,12 @@ RSpec.describe 'rake bun integration', type: :integration do
         _, status = Open3.capture2e('rake bun:install:package', stdin_data: "\n")
         expect(status).to be_success
 
+        binstub = Bundlebun::Runner.binstub_path
         result = JSON.parse(File.read('package.json'))
-        expect(result['scripts']['build']).to eq('bin/bun build ./src/index.ts')
-        expect(result['scripts']['dev']).to eq('bin/bun x vite')
-        expect(result['scripts']['lint']).to eq('bin/bun x eslint .')
-        expect(result['scripts']['test']).to eq('bin/bun run build && bin/bun test')
+        expect(result['scripts']['build']).to eq("#{binstub} build ./src/index.ts")
+        expect(result['scripts']['dev']).to eq("#{binstub} x vite")
+        expect(result['scripts']['lint']).to eq("#{binstub} x eslint .")
+        expect(result['scripts']['test']).to eq("#{binstub} run build && #{binstub} test")
       end
     end
 
