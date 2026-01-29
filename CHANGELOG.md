@@ -1,3 +1,7 @@
+## [Unreleased]
+
+- New `rake bun:install:package` task: automatically migrates `package.json` scripts to use `bin/bun`. Replaces calls to `bun`, `bunx`, `npx`, `npm run`, `yarn run`, `pnpm run`, and `pnpm exec` with their `bin/bun` equivalents. Asks for confirmation.
+
 ## [0.2.3] - 2025-12-17
 
 - Update dependencies

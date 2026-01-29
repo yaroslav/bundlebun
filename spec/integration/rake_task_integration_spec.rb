@@ -4,7 +4,7 @@ require 'open3'
 
 RSpec.describe 'rake bun integration', type: :integration do
   let(:gem_root) { File.expand_path('../../', __dir__) }
-  let(:tmp_dir) { Dir.mktmpdir('vite_integration_test') }
+  let(:tmp_dir) { Dir.mktmpdir('bun_integration_test') }
 
   before(:each) do
     setup_test_environment
@@ -25,6 +25,53 @@ RSpec.describe 'rake bun integration', type: :integration do
       output, status = Open3.capture2e(command)
       expect(status).to be_success
       expect(output.strip).to eq('4')
+    end
+  end
+
+  describe 'bun:install:package' do
+    it 'migrates package.json scripts to use bin/bun' do
+      Dir.chdir(tmp_dir) do
+        File.write('package.json', <<~JSON)
+          {
+            "name": "test-app",
+            "scripts": {
+              "build": "bun build ./src/index.ts",
+              "dev": "bunx vite",
+              "lint": "npx eslint .",
+              "test": "npm run build && bun test"
+            }
+          }
+        JSON
+
+        _, status = Open3.capture2e('rake bun:install:package', stdin_data: "\n")
+        expect(status).to be_success
+
+        result = JSON.parse(File.read('package.json'))
+        expect(result['scripts']['build']).to eq('bin/bun build ./src/index.ts')
+        expect(result['scripts']['dev']).to eq('bin/bun x vite')
+        expect(result['scripts']['lint']).to eq('bin/bun x eslint .')
+        expect(result['scripts']['test']).to eq('bin/bun run build && bin/bun test')
+      end
+    end
+
+    it 'preserves scripts already using bin/bun' do
+      Dir.chdir(tmp_dir) do
+        File.write('package.json', <<~JSON)
+          {
+            "name": "test-app",
+            "scripts": {
+              "build": "bin/bun build ./src/index.ts"
+            }
+          }
+        JSON
+
+        output, status = Open3.capture2e('rake bun:install:package')
+        expect(status).to be_success
+        expect(output).to include('already use bin/bun')
+
+        result = JSON.parse(File.read('package.json'))
+        expect(result['scripts']['build']).to eq('bin/bun build ./src/index.ts')
+      end
     end
   end
 
