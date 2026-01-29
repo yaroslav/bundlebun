@@ -1,10 +1,10 @@
 name: Build and publish
 
 on:
+  # Manual or daily at 6 AM UTC
   workflow_dispatch:
   schedule:
     - cron: "0 6 * * *"
-
 jobs:
   # We're only supposed to continue with the build, integration testing and
   # release if a new Bun version is out.
