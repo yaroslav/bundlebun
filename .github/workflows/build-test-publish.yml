@@ -1,56 +1,20 @@
-name: Build and publish
+name: Build, test and publish
 
 on:
-  # Manual or daily at 6 AM UTC
-  workflow_dispatch:
-  schedule:
-    - cron: "0 6 * * *"
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref to checkout (branch, tag, or SHA)"
+        required: true
+        type: string
+
 jobs:
-  # We're only supposed to continue with the build, integration testing and
-  # release if a new Bun version is out.
-  check_version:
+  build:
     runs-on: ubuntu-latest
-    outputs:
-      new_version: ${{ steps.check_version.outputs.new_version }}
     steps:
       - uses: actions/checkout@v6
-      - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
-          bundler-cache: true
-      - name: Check released Bun version
-        id: check_version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if bundle exec rake bundlebun:check_version; then
-            echo "new_version=true" >> $GITHUB_OUTPUT
-          else
-            echo "new_version=false" >> $GITHUB_OUTPUT
-          fi
-
-  build:
-    needs: check_version
-    if: ${{ needs.check_version.outputs.new_version == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get latest release tag
-        id: get_release_tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Get the latest release tag, or empty if none exists
-          release_tag=$(gh release view --repo ${{ github.repository }} --json tagName -q '.tagName' 2>/dev/null || echo "")
-          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
-          if [ -n "$release_tag" ]; then
-            echo "Latest release tag: $release_tag"
-          else
-            echo "No previous release found, will use main branch"
-          fi
-      - name: Checkout release tag or main
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ steps.get_release_tag.outputs.release_tag || 'main' }}
+          ref: ${{ inputs.ref }}
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
@@ -224,30 +188,14 @@ jobs:
         test-windows,
       ]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Get latest release tag
-        id: get_release_tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Get the latest release tag, or empty if none exists
-          release_tag=$(gh release view --repo ${{ github.repository }} --json tagName -q '.tagName' 2>/dev/null || echo "")
-          echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
-          if [ -n "$release_tag" ]; then
-            echo "Latest release tag: $release_tag"
-          else
-            echo "No previous release found, will use main branch"
-          fi
-      - name: Checkout release tag or main
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
-          ref: ${{ steps.get_release_tag.outputs.release_tag || 'main' }}
+          ref: ${{ inputs.ref }}
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
           bundler-cache: true
-      - run: bundle install
       - uses: actions/download-artifact@v4
         with:
           name: gems

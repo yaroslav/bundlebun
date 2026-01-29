@@ -1,0 +1,46 @@
+name: Check for Bun updates
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily at 6 AM UTC
+    - cron: "0 6 * * *"
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check_version.outputs.should_build }}
+      release_tag: ${{ steps.get_release_tag.outputs.release_tag }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+      - name: Check released Bun version
+        id: check_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if bundle exec rake bundlebun:check_version; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Get latest release tag
+        id: get_release_tag
+        if: steps.check_version.outputs.should_build == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          release_tag=$(gh release view --repo ${{ github.repository }} --json tagName -q '.tagName' 2>/dev/null || echo "")
+          echo "release_tag=${release_tag:-main}" >> $GITHUB_OUTPUT
+
+  build-and-publish:
+    needs: check_version
+    if: needs.check_version.outputs.should_build == 'true'
+    uses: ./.github/workflows/build-test-publish.yml
+    with:
+      ref: ${{ needs.check_version.outputs.release_tag }}
+    secrets: inherit

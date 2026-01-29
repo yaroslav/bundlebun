@@ -1,0 +1,11 @@
+name: Release gem
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: ./.github/workflows/build-test-publish.yml
+    with:
+      ref: main
+    secrets: inherit
