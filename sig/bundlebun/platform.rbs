@@ -1,0 +1,5 @@
+module Bundlebun
+  class Platform
+    def self.windows?: () -> bool
+  end
+end

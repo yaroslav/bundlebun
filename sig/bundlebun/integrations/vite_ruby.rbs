@@ -1,0 +1,12 @@
+module Bundlebun
+  module Integrations
+    module ViteRuby
+      def self.bun!: () -> void
+
+      module RunnerExtensions
+        def vite_executable: (*untyped exec_args) -> Array[String]
+        def bun_binstub_path: () -> String
+      end
+    end
+  end
+end

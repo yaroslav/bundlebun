@@ -1,0 +1,12 @@
+module Bundlebun
+  module Integrations
+    module Cssbundling
+      def self.bun!: () -> void
+
+      module Tasks
+        def install_command: () -> String
+        def build_command: () -> String
+      end
+    end
+  end
+end
