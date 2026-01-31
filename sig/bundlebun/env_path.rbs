@@ -1,0 +1,8 @@
+module Bundlebun
+  class EnvPath
+    def self.path: () -> String?
+    def self.path=: (String new_path) -> String
+    def self.prepend: (String new_path) -> String?
+    def self.separator: () -> String
+  end
+end

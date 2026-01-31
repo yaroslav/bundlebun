@@ -1,0 +1,5 @@
+module Bundlebun
+  module Integrations
+    def self.bun!: () -> Array[Module]
+  end
+end

@@ -1,0 +1,7 @@
+module Bundlebun
+  module Integrations
+    module ExecJS
+      def self.bun!: () -> void
+    end
+  end
+end

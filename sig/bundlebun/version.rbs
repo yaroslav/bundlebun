@@ -1,0 +1,3 @@
+module Bundlebun
+  VERSION: String
+end

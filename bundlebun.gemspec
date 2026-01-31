@@ -26,9 +26,10 @@ Gem::Specification.new do |spec|
   spec.metadata['changelog_uri'] = 'https://github.com/yaroslav/bundlebun/blob/master/CHANGELOG.md'
   spec.metadata['bug_tracker_uri'] = 'https://github.com/yaroslav/bundlebun/issues'
   spec.metadata['documentation_uri'] = 'https://rubydoc.info/gems/bundlebun'
+  spec.metadata['rbs_source'] = 'sig'
   spec.post_install_message = 'Bun.'
 
-  spec.files = Dir['lib/**/*', 'exe/*', 'LICENSE.txt', 'README.md', 'CHANGELOG.md']
+  spec.files = Dir['lib/**/*', 'sig/**/*', 'exe/*', 'LICENSE.txt', 'README.md', 'CHANGELOG.md']
   spec.bindir = 'exe'
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.extra_rdoc_files = ['README.md']

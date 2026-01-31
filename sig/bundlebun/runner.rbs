@@ -1,0 +1,19 @@
+module Bundlebun
+  class Runner
+    BINSTUB_PATH: String
+    RELATIVE_DIRECTORY: String
+
+    def self.call: (*String arguments) -> void
+    def self.binstub_path: () -> String
+    def self.full_binstub_path: () -> String
+    def self.relative_directory: () -> String
+    def self.full_directory: () -> String
+    def self.binary_path: () -> String
+    def self.binary_path_exist?: () -> bool
+    def self.binstub_or_binary_path: () -> String
+    def self.binstub_exist?: () -> bool
+
+    def initialize: (?String | Array[String] arguments) -> void
+    def call: () -> void
+  end
+end

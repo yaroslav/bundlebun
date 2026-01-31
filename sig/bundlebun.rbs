@@ -1,0 +1,8 @@
+module Bundlebun
+  VERSION: String
+
+  def self.call: (*String arguments) -> void
+  def self.prepend_to_path: () -> String?
+  def self.load_tasks: () -> void
+  def self.load_integrations: () -> Array[Module]
+end
