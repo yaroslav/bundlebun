@@ -88,77 +88,12 @@ Similarly, if `Procfile` or `Procfile.*` files are present, the installer will o
 
 _Windows tip:_ If you're on Windows, the `bin\bun.cmd` file will be created. If you've joined an existing project where only the Unix-like binstub exists at that location, just run `rake bun:install` again.
 
-Next, the Rake task will try to detect the integrations we need to install based on the classes and modules Rake can see in your project. We'll continue with integrations.
+Next, the Rake task will try to detect the integrations we need to install based on the classes and modules Rake can see in your project. See: _Integrations_.
 
 **By default, on load, bundlebun:**
 
 - adds the path to the bundled `bun` executable to the start of your application's `PATH`. That simplifies the integration in cases where we don't really need to monkey-patch a lot of code, and we just need to make sure it "sees" our `bun` executable as available.
 - tries to detect and load all possible integrations.
-
-### Integrations
-
-Usually, if you've placed `gem 'bundlebun'` after your frontend-related gems in the `Gemfile`, and did `rake bun:install`, the integrations should all be working out of the box.
-
-Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`. See the API documentation for that.
-
-#### vite-ruby and vite-rails
-
-[vite-ruby](https://github.com/ElMassimo/vite_ruby) and [vite-rails](https://vite-ruby.netlify.app/) are gems that make Ruby and Rails integration with [Vite](https://vite.dev/), a great JavaScript build tool and platform, seamless and easy.
-
-The bundlebun integration would be installed automatically with `rake bun:install`, or you can run:
-
-```sh
-rake bun:install:vite
-```
-
-That will make sure you have a `bin/bun` binstub. Next, we'll install a custom `bin/bun-vite` binstub to use in build scripts. The installer Rake task will create a new `vite.json` file if it does not exist yet, or force the existing one to use that binstub for building. See the [Vite Ruby configuration manual](https://vite-ruby.netlify.app/config/index.html) for details on `vite.json`.
-
-Make sure you have `gem bundlebun` mentioned _after_ all the vite-related gems in your `Gemfile`. If you want to keep integrations to a minimum, and only enable them manually, use the following to manually turn on the bundlebun monkey-patching for vite-ruby:
-
-```ruby
-Bundlebun::Integrations::ViteRuby.bun!
-```
-
-#### Ruby on Rails: cssbundling and jsbundling
-
-[cssbundling](https://github.com/rails/cssbundling-rails) and [jsbundling](https://github.com/rails/jsbundling-rails) are Rails gems that support the traditional CSS and JS building pipeline for Ruby on Rails.
-
-Be sure to check both gems for documentation on bootstrapping your frontend build pipeline (as bundlebun supports them) instead of duplicating approaches. cssbundling, for instance, includes an excellent sample build configuration for Bun.
-
-To quote their READMEs, try this for cssbundling:
-
-```sh
-bundle add cssbundling-rails
-bin/rails css:install:[tailwind|bootstrap|bulma|postcss|sass]
-bin/rails css:build
-```
-
-and this jsbundling:
-
-```sh
-bundle add jsbundling-rails
-bin/rails javascript:install:bun
-```
-
-To make sure the bundlebun integration is installed (although the default `rake bun:install` should detect everything just fine), run
-
-```sh
-rake bun:install:bundling-rails
-```
-
-The task makes sure a `bin/bun` binstub exists and installs an Rake task hack of sorts to ensure both build-related gems use our bundled version of Bun.
-
-#### ExecJS
-
-[ExecJS](https://github.com/rails/execjs) runs JavaScript code straight from Ruby. To do so, it supports a bunch of runtimes it can launch—and get a result. The Bun runtime support already exists for ExecJS; we just need to ensure it uses the bundled one.
-
-The bundlebun integration will work automatically if bundlebun is loaded after ExecJS in the `Gemfile`.
-
-Alternatively, you can load the monkey-patch manually:
-
-```ruby
-Bundlebun::Integrations::ExecJS.bun!
-```
 
 ## Usage
 
@@ -222,6 +157,71 @@ success = Bundlebun.system('test')
 Returns `true` if Bun exited successfully, `false` or `nil` otherwise.
 
 Check out the [API documentation](https://rubydoc.info/gems/bundlebun) on `Bundlebun::Runner` for helper methods.
+
+## Integrations
+
+Usually, if you've placed `gem 'bundlebun'` after your frontend-related gems in the `Gemfile`, and did `rake bun:install`, the integrations should all be working out of the box.
+
+Alternatively, you can ensure an integration is loaded and the necessary modules are patched by calling methods that look like `Bundlebun::Integration::IntegrationName.bun!`. See the API documentation for that.
+
+#### vite-ruby and vite-rails
+
+[vite-ruby](https://github.com/ElMassimo/vite_ruby) and [vite-rails](https://vite-ruby.netlify.app/) are gems that make Ruby and Rails integration with [Vite](https://vite.dev/), a great JavaScript build tool and platform, seamless and easy.
+
+The bundlebun integration would be installed automatically with `rake bun:install`, or you can run:
+
+```sh
+rake bun:install:vite
+```
+
+That will make sure you have a `bin/bun` binstub. Next, we'll install a custom `bin/bun-vite` binstub to use in build scripts. The installer Rake task will create a new `vite.json` file if it does not exist yet, or force the existing one to use that binstub for building. See the [Vite Ruby configuration manual](https://vite-ruby.netlify.app/config/index.html) for details on `vite.json`.
+
+Make sure you have `gem bundlebun` mentioned _after_ all the vite-related gems in your `Gemfile`. If you want to keep integrations to a minimum, and only enable them manually, use the following to manually turn on the bundlebun monkey-patching for vite-ruby:
+
+```ruby
+Bundlebun::Integrations::ViteRuby.bun!
+```
+
+#### Ruby on Rails: cssbundling and jsbundling
+
+[cssbundling](https://github.com/rails/cssbundling-rails) and [jsbundling](https://github.com/rails/jsbundling-rails) are Rails gems that support the traditional CSS and JS building pipeline for Ruby on Rails.
+
+Be sure to check both gems for documentation on bootstrapping your frontend build pipeline (as bundlebun supports them) instead of duplicating approaches. cssbundling, for instance, includes an excellent sample build configuration for Bun.
+
+To quote their READMEs, try this for cssbundling:
+
+```sh
+bundle add cssbundling-rails
+bin/rails css:install:[tailwind|bootstrap|bulma|postcss|sass]
+bin/rails css:build
+```
+
+and this jsbundling:
+
+```sh
+bundle add jsbundling-rails
+bin/rails javascript:install:bun
+```
+
+To make sure the bundlebun integration is installed (although the default `rake bun:install` should detect everything just fine), run
+
+```sh
+rake bun:install:bundling-rails
+```
+
+The task makes sure a `bin/bun` binstub exists and installs an Rake task hack of sorts to ensure both build-related gems use our bundled version of Bun.
+
+#### ExecJS
+
+[ExecJS](https://github.com/rails/execjs) runs JavaScript code straight from Ruby. To do so, it supports a bunch of runtimes it can launch—and get a result. The Bun runtime support already exists for ExecJS; we just need to ensure it uses the bundled one.
+
+The bundlebun integration will work automatically if bundlebun is loaded after ExecJS in the `Gemfile`.
+
+Alternatively, you can load the monkey-patch manually:
+
+```ruby
+Bundlebun::Integrations::ExecJS.bun!
+```
 
 ## Versioning
 
