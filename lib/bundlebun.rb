@@ -33,7 +33,7 @@ module Bundlebun
     # Replaces the current Ruby process with Bun.
     #
     # This is the default way to run Bun. The Ruby process is replaced by Bun
-    # and never returns. Also available via the +.()+ shorthand syntax.
+    # and never returns. Also available via the `.()` shorthand syntax.
     #
     # @param arguments [String, Array<String>] Command arguments to pass to Bun
     # @return [void] This method never returns
@@ -70,8 +70,8 @@ module Bundlebun
     # Use this when you need to run Bun and then continue executing Ruby code.
     #
     # @param arguments [String, Array<String>] Command arguments to pass to Bun
-    # @return [Boolean, nil] +true+ if Bun exited successfully (status 0),
-    #   +false+ if it exited with an error, +nil+ if execution failed
+    # @return [Boolean, nil] `true` if Bun exited successfully (status 0),
+    #   `false` if it exited with an error, `nil` if execution failed
     #
     # @example Run install and check result
     #   if Bundlebun.system('install')
