@@ -34,6 +34,6 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.extra_rdoc_files = ['README.md']
   spec.require_paths = ['lib']
-  spec.add_runtime_dependency 'zeitwerk'
-  spec.add_runtime_dependency 'json'
+  spec.add_runtime_dependency 'zeitwerk', '~> 2.5'
+  spec.add_runtime_dependency 'json', '~> 2.0'
 end
