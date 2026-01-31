@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Bundlebun
   # Bundlebun includes several integrations for frontend-related gems and frameworks.
   #

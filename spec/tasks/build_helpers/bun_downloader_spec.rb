@@ -12,7 +12,7 @@ RSpec.describe BuildHelpers::BunDownloader do
   let(:temp_file) { instance_double(Tempfile, path: '/tmp/fake.zip', unlink: true) }
 
   before do
-    allow(Octokit::Client).to receive(:new).and_return(github_client)
+    allow(BuildHelpers).to receive(:github_client).and_return(github_client)
     allow(github_client).to receive(:latest_release).and_return(release)
 
     # Pretend the file does not exist and just continue with the download

@@ -52,8 +52,7 @@ module BuildHelpers
     end
 
     def fetch_latest_version
-      github = Octokit::Client.new
-      github.latest_release(BUN_REPO).tag_name.delete_prefix('bun-v')
+      BuildHelpers.github_client.latest_release(BUN_REPO).tag_name.delete_prefix('bun-v')
     end
   end
 end

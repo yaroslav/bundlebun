@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
 require_relative '../lib/bundlebun'
+require 'octokit'
 
 module BuildHelpers
   BUN_REPO = 'oven-sh/bun'
   GEM_REPO = 'yaroslav/bundlebun'
+
+  def self.github_client
+    @github_client ||= Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
+  end
 end
 
 require_relative 'build_helpers/platform_manager'

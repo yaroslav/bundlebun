@@ -9,7 +9,7 @@ RSpec.describe BuildHelpers::BunVersion do
   let(:mock_client) { instance_double(Octokit::Client) }
 
   before do
-    allow(Octokit::Client).to receive(:new).and_return(mock_client)
+    allow(BuildHelpers).to receive(:github_client).and_return(mock_client)
   end
 
   describe 'detecting the latest version' do

@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'octokit'
-
 module BuildHelpers
   class BunVersion
     def initialize
-      @github = Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
+      @github = BuildHelpers.github_client
     end
 
     def latest_bun_repo_version
