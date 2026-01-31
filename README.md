@@ -223,6 +223,23 @@ Alternatively, you can load the monkey-patch manually:
 Bundlebun::Integrations::ExecJS.bun!
 ```
 
+#### ActiveSupport::Notifications (Instrumentation)
+
+When ActiveSupport is available, bundlebun emits instrumentation events that you can subscribe to for logging or monitoring:
+
+- `system.bundlebun` for `Bundlebun.system` (calling Bun and returning to Ruby code);
+- `exec.bundlebun` for `Bundlebun.call` / `Bundlebun.exec` (binstubs and wrappers: exiting to Bun).
+
+The payload is `{ command: args }`: the arguments you passed to the method (string or array).
+
+Example subscriber:
+
+```ruby
+ActiveSupport::Notifications.subscribe('system.bundlebun') do |event|
+  Rails.logger.info "Bun: #{event.payload[:command]} (#{event.duration.round(1)}ms)"
+end
+```
+
 ## Versioning
 
 bundlebun uses the `#{bundlebun.version}.#{bun.version}` versioning scheme. Meaning: gem bundlebun version `0.1.0.1.1.38` is a distribution that includes a gem with its own code version `0.1.0` and a Bun runtime with version `1.1.38`.

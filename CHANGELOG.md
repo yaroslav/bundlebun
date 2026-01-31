@@ -2,6 +2,8 @@
 
 - `Bundlebun.system(args)` method: runs Bun as a subprocess and returns to Ruby. Returns `true` if Bun exited successfully. Use this when you need to continue executing Ruby code after Bun finishes.
 - Default behaviour remains: `Bundlebun.()` / `Bundlebun.call` / `Bundlebun.exec` all replace the current Ruby process with Bun (never return). This is what binstubs and wrappers use.
+
+- ActiveSupport::Notifications instrumentation added. `system.bundlebun` for  `Bundlebun.system` calls, `exec.bundlebun` for exec calls (binstubs, wrappers). Payload: `{ command: args }`.
 - Added RBS type signatures for the public API
 
 ## [0.3.0] - 2026-01-29

@@ -307,4 +307,60 @@ RSpec.describe Bundlebun::Runner do
       expect(described_class.system('--version')).to be true
     end
   end
+
+  describe 'instrumentation' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+      stub_const('ActiveSupport::Notifications', double('ActiveSupport::Notifications'))
+    end
+
+    describe '#exec' do
+      it 'instruments exec.bundlebun before replacing process' do
+        runner = described_class.new('install')
+        expect(ActiveSupport::Notifications).to receive(:instrument)
+          .with('exec.bundlebun', {command: 'install'})
+        expect(Kernel).to receive(:exec)
+        runner.exec
+      end
+    end
+
+    describe '#system' do
+      it 'instruments system.bundlebun with a block' do
+        runner = described_class.new('install')
+        expect(ActiveSupport::Notifications).to receive(:instrument)
+          .with('system.bundlebun', {command: 'install'})
+          .and_yield
+        expect(Kernel).to receive(:system).and_return(true)
+        runner.system
+      end
+
+      it 'passes the command as payload' do
+        runner = described_class.new(['add', 'postcss'])
+        expect(ActiveSupport::Notifications).to receive(:instrument)
+          .with('system.bundlebun', {command: ['add', 'postcss']})
+          .and_yield
+        expect(Kernel).to receive(:system).and_return(true)
+        runner.system
+      end
+    end
+  end
+
+  describe 'without ActiveSupport' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+      # ActiveSupport::Notifications is not defined in this context
+    end
+
+    it 'still works for #system' do
+      runner = described_class.new('install')
+      expect(Kernel).to receive(:system).and_return(true)
+      expect(runner.system).to be true
+    end
+
+    it 'still works for #exec' do
+      runner = described_class.new('install')
+      expect(Kernel).to receive(:exec)
+      runner.exec
+    end
+  end
 end

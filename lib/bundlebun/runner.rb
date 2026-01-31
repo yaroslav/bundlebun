@@ -28,6 +28,10 @@ module Bundlebun
     class << self
       # Replaces the current Ruby process with Bun.
       #
+      # When `ActiveSupport::Notifications` is available, this method publishes an
+      # `exec.bundlebun` event before replacing the process. The payload contains
+      # `{ command: arguments }` where `arguments` is what was passed to the method.
+      #
       # @param arguments [String, Array<String>] Command arguments to pass to Bun
       # @return [void] This method never returns
       #
@@ -43,7 +47,7 @@ module Bundlebun
       end
 
       # Replaces the current Ruby process with Bun. Alias for {.exec}.
-      # Also available via the +.()+ shorthand syntax.
+      # Also available via the `.()` shorthand syntax.
       #
       # @param arguments [String, Array<String>] Command arguments to pass to Bun
       # @return [void] This method never returns
@@ -66,9 +70,13 @@ module Bundlebun
       # Unlike {.call} and {.exec}, this method does not replace the current process.
       # Use this when you need to run Bun and then continue executing Ruby code.
       #
+      # When `ActiveSupport::Notifications` is available, this method publishes a
+      # `system.bundlebun` event with timing information. The payload contains
+      # `{ command: arguments }` where `arguments` is what was passed to the method.
+      #
       # @param arguments [String, Array<String>] Command arguments to pass to Bun
-      # @return [Boolean, nil] +true+ if Bun exited successfully (status 0),
-      #   +false+ if it exited with an error, +nil+ if execution failed
+      # @return [Boolean, nil] `true` if Bun exited successfully (status 0),
+      #   `false` if it exited with an error, `nil` if execution failed
       #
       # @example Run install and check result
       #   if Bundlebun.system('install')
@@ -172,6 +180,10 @@ module Bundlebun
     # Replaces the current Ruby process with Bun.
     # This is the default behavior.
     #
+    # When `ActiveSupport::Notifications` is available, this method publishes an
+    # `exec.bundlebun` event before replacing the process. The payload contains
+    # `{ command: arguments }` where `arguments` is what was passed to the runner.
+    #
     # @return [void] This method never returns
     #
     # @example
@@ -181,6 +193,7 @@ module Bundlebun
     # @see #system
     def exec
       check_executable!
+      instrument('exec.bundlebun')
       Kernel.exec(command)
     end
 
@@ -198,8 +211,12 @@ module Bundlebun
     # Unlike {#call} and {#exec}, this method does not replace the current process.
     # Use this when you need to run Bun and then continue executing Ruby code.
     #
-    # @return [Boolean, nil] +true+ if Bun exited successfully (status 0),
-    #   +false+ if it exited with an error, +nil+ if execution failed
+    # When `ActiveSupport::Notifications` is available, this method publishes a
+    # `system.bundlebun` event with timing information. The payload contains
+    # `{ command: arguments }` where `arguments` is what was passed to the runner.
+    #
+    # @return [Boolean, nil] `true` if Bun exited successfully (status 0),
+    #   `false` if it exited with an error, `nil` if execution failed
     #
     # @example
     #   runner = Bundlebun::Runner.new('install')
@@ -210,12 +227,25 @@ module Bundlebun
     # @see #exec
     def system
       check_executable!
-      Kernel.system(command)
+      instrument('system.bundlebun') do
+        Kernel.system(command)
+      end
     end
 
     private
 
     attr_reader :arguments
+
+    def instrument(event, &block)
+      return block&.call unless defined?(ActiveSupport::Notifications)
+
+      payload = {command: arguments}
+      if block
+        ActiveSupport::Notifications.instrument(event, payload, &block)
+      else
+        ActiveSupport::Notifications.instrument(event, payload)
+      end
+    end
 
     def check_executable!
       return if self.class.binary_path_exist?
