@@ -17,5 +17,5 @@ require 'rake'
 desc 'Run bundled Bun with parameters. Example: rake "bun[build]"'
 task :bun, [:command] do |_t, args|
   command = args[:command] || ''
-  Bundlebun::Runner.call(command)
+  Bundlebun.call(command)
 end

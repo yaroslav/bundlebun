@@ -24,4 +24,4 @@ rescue LoadError
 end
 require 'bundlebun'
 
-Bundlebun::Runner.call(ARGV)
+Bundlebun.call(ARGV)

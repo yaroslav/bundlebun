@@ -10,7 +10,8 @@ RSpec.describe 'rake bun' do
     require 'bundlebun'
     Bundlebun.load_tasks
 
-    allow_any_instance_of(Bundlebun::Runner).to receive(:exec)
+    # Prevent actual bun execution
+    allow(Kernel).to receive(:exec)
     allow(File).to receive(:exist?).with(binary_path).and_return(true)
   end
 
@@ -20,24 +21,18 @@ RSpec.describe 'rake bun' do
 
   describe 'command execution' do
     it 'executes bun with no arguments' do
-      expect_command_execution(binary_path)
+      expect(Kernel).to receive(:exec).with(binary_path)
       Rake::Task[task_name].invoke
     end
 
     it 'executes bun with command string' do
-      expect_command_execution("#{binary_path} install package")
+      expect(Kernel).to receive(:exec).with("#{binary_path} install package")
       Rake::Task[task_name].invoke('install package')
     end
 
     it 'handles command with quotes' do
-      expect_command_execution(%{#{binary_path} -e 'console.log(2+2)'})
+      expect(Kernel).to receive(:exec).with(%{#{binary_path} -e 'console.log(2+2)'})
       Rake::Task[task_name].invoke("-e 'console.log(2+2)'")
     end
-  end
-
-  private
-
-  def expect_command_execution(command)
-    expect_any_instance_of(Bundlebun::Runner).to receive(:exec).with(command)
   end
 end

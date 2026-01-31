@@ -3,29 +3,84 @@
 module Bundlebun
   # {Runner} is the class that bundlebun uses to run the bundled Bun executable.
   #
+  # bundlebun provides two ways to run Bun:
+  #
+  # - {.call} (also available as {.exec}): Replaces the current Ruby process with Bun. This is the default.
+  #
+  # - {.system}: Runs Bun as a subprocess and returns control to Ruby.
+  #   Use this when you need to continue executing Ruby code after Bun finishes.
+  #
   # @see Bundlebun
+  #
+  # @example Running Bun (replaces process, never returns)
+  #   Bundlebun.('install')
+  #   Bundlebun.call('outdated')
+  #   Bundlebun.call(['add', 'postcss'])
+  #
+  # @example Running Bun as subprocess (returns to Ruby)
+  #   if Bundlebun.system('install')
+  #     puts 'Dependencies installed!'
+  #   end
   class Runner
     BINSTUB_PATH = 'bin/bun'
     RELATIVE_DIRECTORY = 'lib/bundlebun/vendor/bun'
 
     class << self
-      # Runs the Bun runtime with parameters.
-      #
-      # A wrapper for {Bundlebun::Runner.new}, {Bundlebun::Runner.call}.
+      # Replaces the current Ruby process with Bun.
       #
       # @param arguments [String, Array<String>] Command arguments to pass to Bun
-      # @return [Integer] Exit status code (`127` if executable not found)
+      # @return [void] This method never returns
       #
-      # @example String as an argument
-      #   Bundlebun.call('--version') # => `bun --version`
+      # @example In a binstub (bin/bun)
+      #   #!/usr/bin/env ruby
+      #   require 'bundlebun'
+      #   Bundlebun.exec(ARGV)
       #
-      # @example Array of strings as an argument
-      #   Bundlebun.call(['add', 'postcss']) # => `bun add postcss`
+      # @see .call
+      # @see .system
+      def exec(...)
+        new(...).exec
+      end
+
+      # Replaces the current Ruby process with Bun. Alias for {.exec}.
+      # Also available via the +.()+ shorthand syntax.
       #
-      # @see Bundlebun::Runner.new
-      # @see Bundlebun::Runner#call
+      # @param arguments [String, Array<String>] Command arguments to pass to Bun
+      # @return [void] This method never returns
+      #
+      # @example Basic usage
+      #   Bundlebun.call('outdated')
+      #   Bundlebun.call(['add', 'postcss'])
+      #
+      # @example Using the .() shorthand
+      #   Bundlebun.('install')
+      #
+      # @see .exec
+      # @see .system
       def call(...)
-        new(...).call
+        exec(...)
+      end
+
+      # Runs Bun as a subprocess and returns control to Ruby.
+      #
+      # Unlike {.call} and {.exec}, this method does not replace the current process.
+      # Use this when you need to run Bun and then continue executing Ruby code.
+      #
+      # @param arguments [String, Array<String>] Command arguments to pass to Bun
+      # @return [Boolean, nil] +true+ if Bun exited successfully (status 0),
+      #   +false+ if it exited with an error, +nil+ if execution failed
+      #
+      # @example Run install and check result
+      #   if Bundlebun.system('install')
+      #     puts 'Dependencies installed!'
+      #   else
+      #     puts 'Installation failed'
+      #   end
+      #
+      # @see .call
+      # @see .exec
+      def system(...)
+        new(...).system
       end
 
       # A relative path to binstub that bundlebun usually generates with installation Rake tasks.
@@ -98,35 +153,64 @@ module Bundlebun
       end
     end
 
-    # Intialize the {Runner} with arguments to run the Bun runtime later via #call.
+    # Initialize the {Runner} with arguments to run the Bun runtime later.
     #
     # @param arguments [String, Array<String>] Command arguments to pass to Bun
     #
     # @example String as an argument
-    #   Bundlebun::Runner.new('--version') # => `bun --version`
+    #   Bundlebun::Runner.new('--version')
     #
     # @example Array of strings as an argument
-    #   Bundlebun::Runner.new(['add', 'postcss']) # => `bun add postcss`
+    #   Bundlebun::Runner.new(['add', 'postcss'])
     #
-    # @see Bundlebun::Runner#call
+    # @see #system
+    # @see #exec
     def initialize(arguments = '')
       @arguments = arguments
     end
 
-    # Runs the Bun executable with previously specified arguments.
+    # Replaces the current Ruby process with Bun.
+    # This is the default behavior.
     #
-    # Check other methods of {Bundlebun::Runner} to see how we determine what to run exactly.
-    #
-    # @return [Integer] Exit status code (`127` if executable not found)
+    # @return [void] This method never returns
     #
     # @example
-    #   b = Bundlebun::Runner.new('--version')
-    #   b.call
+    #   runner = Bundlebun::Runner.new(ARGV)
+    #   runner.exec  # Ruby process ends here, Bun takes over
     #
-    # @see Bundlebun::Runner
-    def call
+    # @see #system
+    def exec
       check_executable!
-      exec(command)
+      Kernel.exec(command)
+    end
+
+    # Replaces the current Ruby process with Bun. Alias for {#exec}.
+    #
+    # @return [void] This method never returns
+    #
+    # @see #exec
+    def call
+      exec
+    end
+
+    # Runs Bun as a subprocess and returns control to Ruby.
+    #
+    # Unlike {#call} and {#exec}, this method does not replace the current process.
+    # Use this when you need to run Bun and then continue executing Ruby code.
+    #
+    # @return [Boolean, nil] +true+ if Bun exited successfully (status 0),
+    #   +false+ if it exited with an error, +nil+ if execution failed
+    #
+    # @example
+    #   runner = Bundlebun::Runner.new('install')
+    #   if runner.system
+    #     puts 'Dependencies installed!'
+    #   end
+    #
+    # @see #exec
+    def system
+      check_executable!
+      Kernel.system(command)
     end
 
     private
