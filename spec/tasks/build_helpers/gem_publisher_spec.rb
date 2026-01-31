@@ -148,4 +148,105 @@ RSpec.describe BuildHelpers::GemPublisher do
       )
     end
   end
+
+  describe 'extracting a CHANGELOG part for the release notes' do
+    let(:changelog_content) do
+      <<~CHANGELOG
+        ## [Unreleased]
+
+        - Upcoming feature that is not yet released
+        - Another upcoming feature
+
+        ## [0.3.0] - 2026-01-29
+
+        - New `rake bun:install:package` task: automatically migrates `package.json` scripts
+        - New `rake bun:install:procfile` task: automatically migrates `Procfile` files
+        - Both tasks are automatically invoked by `rake bun:install`
+
+        ## [0.2.0] - 2025-01-30
+
+        - Major update with new features
+        - Breaking changes included
+
+        ## [0.1.0] - 2024-12-15
+
+        - Initial release
+      CHANGELOG
+    end
+
+    let(:tmpfile) do
+      file = Tempfile.new(['CHANGELOG', '.md'])
+      file.write(changelog_content)
+      file.close
+      file
+    end
+
+    after { tmpfile.unlink }
+
+    before do
+      allow(File).to receive(:expand_path)
+        .with('../../CHANGELOG.md', anything)
+        .and_return(tmpfile.path)
+    end
+
+    it 'extracts changelog content for a base version' do
+      result = publisher.send(:extract_changelog_for_version, '0.3.0')
+
+      expect(result).to include('rake bun:install:package')
+      expect(result).to include('rake bun:install:procfile')
+      expect(result).to include('Both tasks are automatically invoked')
+    end
+
+    it 'extracts changelog content for a composite version' do
+      result = publisher.send(:extract_changelog_for_version, '0.3.0.1.1.38')
+
+      expect(result).to include('rake bun:install:package')
+      expect(result).not_to include('Unreleased')
+      expect(result).not_to include('Major update')
+    end
+
+    it 'extracts the last version in changelog' do
+      result = publisher.send(:extract_changelog_for_version, '0.1.0')
+
+      expect(result).to eq('- Initial release')
+    end
+
+    it 'returns nil for non-existent version' do
+      result = publisher.send(:extract_changelog_for_version, '9.9.9')
+
+      expect(result).to be_nil
+    end
+
+    it 'does not include content from other versions' do
+      result = publisher.send(:extract_changelog_for_version, '0.2.0')
+
+      expect(result).to include('Major update')
+      expect(result).not_to include('Initial release')
+      expect(result).not_to include('rake bun:install:package')
+    end
+
+    context 'when changelog file does not exist' do
+      before do
+        allow(File).to receive(:expand_path)
+          .with('../../CHANGELOG.md', anything)
+          .and_return('/nonexistent/path/CHANGELOG.md')
+      end
+
+      it 'returns nil' do
+        result = publisher.send(:extract_changelog_for_version, '0.3.0')
+
+        expect(result).to be_nil
+      end
+    end
+
+    context 'when changelog has malformed content' do
+      let(:changelog_content) { 'This is not a valid changelog format' }
+
+      it 'returns nil' do
+        result = publisher.send(:extract_changelog_for_version, '0.3.0')
+
+        expect(result).to be_nil
+      end
+    end
+  end
 end

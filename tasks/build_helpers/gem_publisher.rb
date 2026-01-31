@@ -67,12 +67,24 @@ module BuildHelpers
 
     def generate_release_notes
       bun_version = @version_checker.latest_bun_repo_version
-      <<~NOTES
+      changelog_content = extract_changelog_for_version(@version)
+
+      notes = <<~NOTES
         bundlebun #{@version}, includes a binary distribution of [Bun #{bun_version}](https://github.com/#{BuildHelpers::BUN_REPO}/releases/tag/bun-v#{bun_version}). Built for: #{PlatformManager::PLATFORM_MAPPING.keys.join(", ")}.
 
-        Changelog: [CHANGELOG](https://github.com/#{BuildHelpers::GEM_REPO}/blob/main/CHANGELOG.md).
+      NOTES
 
-        See [README](https://github.com/#{BuildHelpers::GEM_REPO}) for installation instructions and documentation. See [LICENSE](https://github.com/#{BuildHelpers::GEM_REPO}/blob/main/LICENSE.txt) for licensing information.
+      if changelog_content && !changelog_content.empty?
+        notes += <<~CHANGELOG
+          ### What's new
+
+          #{changelog_content}
+
+        CHANGELOG
+      end
+
+      notes += <<~FOOTER
+        See [README](https://github.com/#{BuildHelpers::GEM_REPO}) for installation instructions and documentation. See [CHANGELOG](https://github.com/#{BuildHelpers::GEM_REPO}/blob/main/CHANGELOG.md) for full history. See [LICENSE](https://github.com/#{BuildHelpers::GEM_REPO}/blob/main/LICENSE.txt) for licensing information.
 
         ### Quick installation
 
@@ -81,7 +93,24 @@ module BuildHelpers
 
         rake bun:install
         ```
-      NOTES
+      FOOTER
+
+      notes
+    end
+
+    def extract_changelog_for_version(version)
+      changelog_path = File.expand_path('../../CHANGELOG.md', __dir__)
+      base_version = version.to_s.split('.')[0..2].join('.')
+      content = File.read(changelog_path)
+
+      # Match the section for this version until the next version header or end of file
+      pattern = /^## \[#{Regexp.escape(base_version)}\][^\n]*\n(.*?)(?=^## \[|\z)/m
+      match = content.match(pattern)
+      return nil unless match
+
+      match[1].strip
+    rescue
+      nil
     end
 
     def publish_to_rubygems
