@@ -3,7 +3,15 @@ module Bundlebun
     BINSTUB_PATH: String
     RELATIVE_DIRECTORY: String
 
-    def self.call: (*String arguments) -> void
+    # Replaces the current Ruby process with Bun. Never returns.
+    def self.exec: (String | Array[String] arguments) -> bot
+
+    # Replaces the current Ruby process with Bun. Alias for .exec. Never returns.
+    def self.call: (String | Array[String] arguments) -> bot
+
+    # Runs Bun as a subprocess and returns control to Ruby.
+    def self.system: (String | Array[String] arguments) -> bool?
+
     def self.binstub_path: () -> String
     def self.full_binstub_path: () -> String
     def self.relative_directory: () -> String
@@ -14,6 +22,14 @@ module Bundlebun
     def self.binstub_exist?: () -> bool
 
     def initialize: (?String | Array[String] arguments) -> void
-    def call: () -> void
+
+    # Replaces the current Ruby process with Bun. Never returns.
+    def exec: () -> bot
+
+    # Replaces the current Ruby process with Bun. Alias for #exec. Never returns.
+    def call: () -> bot
+
+    # Runs Bun as a subprocess and returns control to Ruby.
+    def system: () -> bool?
   end
 end

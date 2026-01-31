@@ -197,12 +197,29 @@ bun outdated v1.1.38 (bf2f153f)
 
 **Check bundlebun API: https://rubydoc.info/gems/bundlebun**.
 
-The easiest way to call Bun from Ruby would be `Bundlebun.call`:
+The easiest way to call Bun from Ruby is via `Bundlebun.()` (shortcut for `Bundlebun.call()`).
+
+**Note:** `Bundlebun.call` replaces the current Ruby process with Bun: it never returns.
 
 ```ruby
-Bundlebun.call("outdated") # => `bun outdated`
-Bundlebun.call(["add", "postcss"]) # => `bun add postcss`
+Bundlebun.('outdated')             # runs `bun outdated`
+Bundlebun.call(['add', 'postcss']) # runs `bun add postcss`
 ```
+
+If you need to run Bun and then continue executing your Ruby code, use `Bundlebun.system`:
+
+```ruby
+if Bundlebun.system('install')
+  puts 'Dependencies installed!'
+else
+  puts 'Installation failed'
+end
+
+# Run tests and check result
+success = Bundlebun.system('test')
+```
+
+Returns `true` if Bun exited successfully, `false` or `nil` otherwise.
 
 Check out the [API documentation](https://rubydoc.info/gems/bundlebun) on `Bundlebun::Runner` for helper methods.
 

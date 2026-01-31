@@ -2,11 +2,12 @@
 
 RSpec.describe Bundlebun::Runner do
   let(:runner) { described_class.new }
+  let(:binary_path) { described_class.binary_path }
 
+  # Prevent any bun execution from leaking through in tests
   before do
-    allow_any_instance_of(described_class).to receive(:exec) do |_instance, _command|
-      true
-    end
+    allow(Kernel).to receive(:system).and_return(true)
+    allow(Kernel).to receive(:exec)
   end
 
   describe 'with vendor directory' do
@@ -182,37 +183,128 @@ RSpec.describe Bundlebun::Runner do
     end
   end
 
-  context 'running Bun' do
-    let(:binary_path) { described_class.binary_path }
-
+  describe '#exec' do
     before do
       allow(File).to receive(:exist?).with(binary_path).and_return(true)
     end
 
-    it 'executes bun with given string arguments' do
+    it 'replaces process with bun using string arguments' do
       runner = described_class.new('install --no-save')
-      expect(runner).to receive(:exec).with("#{binary_path} install --no-save")
-      runner.call
+      expect(Kernel).to receive(:exec).with("#{binary_path} install --no-save")
+      runner.exec
     end
 
-    it 'executes bun with given array arguments' do
+    it 'replaces process with bun using array arguments' do
       runner = described_class.new(['install', '--no-save'])
-      expect(runner).to receive(:exec).with("#{binary_path} install --no-save")
-      runner.call
+      expect(Kernel).to receive(:exec).with("#{binary_path} install --no-save")
+      runner.exec
     end
 
-    it 'executes bun without arguments' do
+    it 'replaces process with bun without arguments' do
       runner = described_class.new
-      expect(runner).to receive(:exec).with(binary_path)
-      runner.call
+      expect(Kernel).to receive(:exec).with(binary_path)
+      runner.exec
     end
 
     it 'exits with code 127 if bun executable does not exist' do
-      allow(File).to receive(:exist?).with(described_class.binary_path).and_return(false)
-      expect(Kernel).to receive(:warn)
+      allow(File).to receive(:exist?).with(binary_path).and_return(false)
+      runner = described_class.new('test')
+
+      expect(Kernel).to receive(:warn).with(/Unable to run Bun/)
       expect(Kernel).to receive(:exit).with(127)
 
-      described_class.call('test')
+      runner.exec
+    end
+  end
+
+  describe '#call' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+    end
+
+    it 'is an alias for #exec' do
+      runner = described_class.new('--version')
+      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      runner.call
+    end
+  end
+
+  describe '#system' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+    end
+
+    it 'runs bun as a subprocess with string arguments' do
+      runner = described_class.new('install --no-save')
+      expect(Kernel).to receive(:system).with("#{binary_path} install --no-save").and_return(true)
+      expect(runner.system).to be true
+    end
+
+    it 'runs bun as a subprocess with array arguments' do
+      runner = described_class.new(['install', '--no-save'])
+      expect(Kernel).to receive(:system).with("#{binary_path} install --no-save").and_return(true)
+      expect(runner.system).to be true
+    end
+
+    it 'runs bun without arguments' do
+      runner = described_class.new
+      expect(Kernel).to receive(:system).with(binary_path).and_return(true)
+      expect(runner.system).to be true
+    end
+
+    it 'returns false when bun exits with error' do
+      runner = described_class.new('invalid-command')
+      expect(Kernel).to receive(:system).and_return(false)
+      expect(runner.system).to be false
+    end
+
+    it 'returns nil when execution fails' do
+      runner = described_class.new('test')
+      expect(Kernel).to receive(:system).and_return(nil)
+      expect(runner.system).to be_nil
+    end
+
+    it 'exits with code 127 if bun executable does not exist' do
+      allow(File).to receive(:exist?).with(binary_path).and_return(false)
+      runner = described_class.new('test')
+
+      expect(Kernel).to receive(:warn).with(/Unable to run Bun/)
+      expect(Kernel).to receive(:exit).with(127)
+
+      runner.system
+    end
+  end
+
+  describe '.exec' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+    end
+
+    it 'creates a runner and calls exec' do
+      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      described_class.exec('--version')
+    end
+  end
+
+  describe '.call' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+    end
+
+    it 'is an alias for .exec' do
+      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      described_class.call('--version')
+    end
+  end
+
+  describe '.system' do
+    before do
+      allow(File).to receive(:exist?).with(binary_path).and_return(true)
+    end
+
+    it 'creates a runner and calls system' do
+      expect(Kernel).to receive(:system).with("#{binary_path} --version").and_return(true)
+      expect(described_class.system('--version')).to be true
     end
   end
 end

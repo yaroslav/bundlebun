@@ -9,26 +9,82 @@ require 'zeitwerk'
 # bundlebun includes binary distributions of Bun for each of the supported
 # platforms (macOS, Linux, Windows) and architectures.
 #
+# bundlebun provides two ways to run Bun:
+#
+# - {.call} (also available as {.exec}): Replaces the current Ruby process with Bun. The default.
+#
+# - {.system}: Runs Bun as a subprocess and returns control to Ruby.
+#   Use this when you need to continue executing Ruby code after Bun finishes.
+#
 # @see Bundlebun::Runner
 # @see Bundlebun::Integrations
+#
+# @example Running Bun (replaces process, never returns)
+#   Bundlebun.('install')                # .() shorthand syntax
+#   Bundlebun.call('outdated')
+#   Bundlebun.call(['add', 'postcss'])
+#
+# @example Running Bun as subprocess (returns to Ruby)
+#   if Bundlebun.system('install')
+#     puts 'Dependencies installed!'
+#   end
 module Bundlebun
   class << self
-    # Runs the Bun runtime with parameters.
+    # Replaces the current Ruby process with Bun.
     #
-    # A shortcut for {Bundlebun::Runner.call}.
+    # This is the default way to run Bun. The Ruby process is replaced by Bun
+    # and never returns. Also available via the +.()+ shorthand syntax.
     #
     # @param arguments [String, Array<String>] Command arguments to pass to Bun
-    # @return [Integer] Exit status code (`127` if executable not found)
+    # @return [void] This method never returns
     #
-    # @example String as an argument
-    #   Bundlebun.call('--version') # => `bun --version`
+    # @example Basic usage
+    #   Bundlebun.call('outdated')
+    #   Bundlebun.call(['add', 'postcss'])
     #
-    # @example Array of strings as an argument
-    #   Bundlebun.call(['add', 'postcss']) # => `bun add postcss`
+    # @example Using the .() shorthand
+    #   Bundlebun.('install')
+    #   Bundlebun.(ARGV)
     #
+    # @see .exec
+    # @see .system
     # @see Bundlebun::Runner.call
     def call(...)
       Runner.call(...)
+    end
+
+    # Replaces the current Ruby process with Bun. Same as {.call}.
+    #
+    # @param arguments [String, Array<String>] Command arguments to pass to Bun
+    # @return [void] This method never returns
+    #
+    # @see .call
+    # @see Bundlebun::Runner.exec
+    def exec(...)
+      Runner.exec(...)
+    end
+
+    # Runs Bun as a subprocess and returns control to Ruby.
+    #
+    # Unlike {.call} and {.exec}, this method does not replace the current process.
+    # Use this when you need to run Bun and then continue executing Ruby code.
+    #
+    # @param arguments [String, Array<String>] Command arguments to pass to Bun
+    # @return [Boolean, nil] +true+ if Bun exited successfully (status 0),
+    #   +false+ if it exited with an error, +nil+ if execution failed
+    #
+    # @example Run install and check result
+    #   if Bundlebun.system('install')
+    #     puts 'Dependencies installed!'
+    #   else
+    #     puts 'Installation failed'
+    #   end
+    #
+    # @see .call
+    # @see .exec
+    # @see Bundlebun::Runner.system
+    def system(...)
+      Runner.system(...)
     end
 
     def loader # @private

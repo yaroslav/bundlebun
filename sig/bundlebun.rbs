@@ -1,7 +1,17 @@
 module Bundlebun
   VERSION: String
 
-  def self.call: (*String arguments) -> void
+  # Replaces the current Ruby process with Bun.
+  # This is the default way to run Bun. Never returns.
+  def self.call: (String | Array[String] arguments) -> bot
+
+  # Replaces the current Ruby process with Bun. Same as .call.
+  def self.exec: (String | Array[String] arguments) -> bot
+
+  # Runs Bun as a subprocess and returns control to Ruby.
+  # Returns true if Bun exited successfully, false if it failed, nil if execution failed.
+  def self.system: (String | Array[String] arguments) -> bool?
+
   def self.prepend_to_path: () -> String?
   def self.load_tasks: () -> void
   def self.load_integrations: () -> Array[Module]
