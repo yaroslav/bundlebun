@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = 'https://github.com/yaroslav/bundlebun'
-  spec.metadata['changelog_uri'] = 'https://github.com/yaroslav/bundlebun/blob/master/CHANGELOG.md'
+  spec.metadata['changelog_uri'] = 'https://github.com/yaroslav/bundlebun/blob/main/CHANGELOG.md'
   spec.metadata['bug_tracker_uri'] = 'https://github.com/yaroslav/bundlebun/issues'
   spec.metadata['documentation_uri'] = 'https://rubydoc.info/gems/bundlebun'
   spec.metadata['rbs_source'] = 'sig'
