@@ -67,20 +67,22 @@ module BuildHelpers
 
     def generate_release_notes
       bun_version = @version_checker.latest_bun_repo_version
-      changelog_content = extract_changelog_for_version(@version)
 
       notes = <<~NOTES
         bundlebun #{@version}, includes a binary distribution of [Bun #{bun_version}](https://github.com/#{BuildHelpers::BUN_REPO}/releases/tag/bun-v#{bun_version}). Built for: #{PlatformManager::PLATFORM_MAPPING.keys.join(", ")}.
 
       NOTES
 
-      if changelog_content && !changelog_content.empty?
-        notes += <<~CHANGELOG
-          ### What's new
+      if code_release?
+        changelog_content = extract_changelog_for_version(@version)
+        if changelog_content && !changelog_content.empty?
+          notes += <<~CHANGELOG
+            ### What's new
 
-          #{changelog_content}
+            #{changelog_content}
 
-        CHANGELOG
+          CHANGELOG
+        end
       end
 
       notes += <<~FOOTER
@@ -100,7 +102,7 @@ module BuildHelpers
 
     def extract_changelog_for_version(version)
       changelog_path = File.expand_path('../../CHANGELOG.md', __dir__)
-      base_version = version.to_s.split('.')[0..2].join('.')
+      base_version = codebase_version(version)
       content = File.read(changelog_path)
 
       # Match the section for this version until the next version header or end of file
@@ -111,6 +113,19 @@ module BuildHelpers
       match[1].strip
     rescue
       nil
+    end
+
+    def code_release?
+      previous_release = @github_client.latest_release(GEM_REPO)
+      previous_version = previous_release.tag_name.delete_prefix('bundlebun-v')
+
+      codebase_version(@version) != codebase_version(previous_version)
+    rescue Octokit::NotFound
+      true
+    end
+
+    def codebase_version(version)
+      version.to_s.split('.')[0..2].join('.')
     end
 
     def publish_to_rubygems

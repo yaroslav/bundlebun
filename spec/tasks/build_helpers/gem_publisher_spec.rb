@@ -15,6 +15,9 @@ RSpec.describe BuildHelpers::GemPublisher do
     allow(Octokit::Client).to receive(:new).and_return(github_client)
     allow(BuildHelpers::BunVersion).to receive(:new).and_return(version_checker)
     allow(version_checker).to receive(:latest_bun_repo_version).and_return('1.0.0')
+    allow(github_client).to receive(:latest_release)
+      .with(BuildHelpers::GEM_REPO)
+      .and_return(instance_double('Release', tag_name: 'bundlebun-v0.0.9.1.0.0'))
 
     allow(File).to receive(:exist?).and_return(true)
     allow(File).to receive(:readlines)
@@ -247,6 +250,72 @@ RSpec.describe BuildHelpers::GemPublisher do
 
         expect(result).to be_nil
       end
+    end
+  end
+
+  describe 'generating release notes' do
+    let(:changelog_content) do
+      <<~CHANGELOG
+        ## [Unreleased]
+
+        - Upcoming feature
+
+        ## [0.1.0] - 2024-12-15
+
+        - Initial release
+      CHANGELOG
+    end
+
+    let(:tmpfile) do
+      file = Tempfile.new(['CHANGELOG', '.md'])
+      file.write(changelog_content)
+      file.close
+      file
+    end
+
+    before do
+      allow(File).to receive(:expand_path)
+        .with('../../CHANGELOG.md', anything)
+        .and_return(tmpfile.path)
+    end
+
+    after { tmpfile.unlink }
+
+    it 'includes changelog entries for a new code release' do
+      allow(github_client).to receive(:latest_release)
+        .with(BuildHelpers::GEM_REPO)
+        .and_return(instance_double('Release', tag_name: 'bundlebun-v0.0.9.1.1.39'))
+
+      notes = publisher.send(:generate_release_notes)
+
+      expect(notes).to include("bundlebun #{version}")
+      expect(notes).to include("Bun 1.0.0")
+      expect(notes).to include("### What's new")
+      expect(notes).to include('- Initial release')
+    end
+
+    it 'skips changelog entries for a Bun-only release' do
+      allow(github_client).to receive(:latest_release)
+        .with(BuildHelpers::GEM_REPO)
+        .and_return(instance_double('Release', tag_name: 'bundlebun-v0.1.0.1.1.39'))
+
+      notes = publisher.send(:generate_release_notes)
+
+      expect(notes).to include("bundlebun #{version}")
+      expect(notes).to include("Bun 1.0.0")
+      expect(notes).not_to include("### What's new")
+      expect(notes).not_to include('- Initial release')
+    end
+
+    it 'includes changelog entries when there were no previous releases' do
+      allow(github_client).to receive(:latest_release)
+        .with(BuildHelpers::GEM_REPO)
+        .and_raise(Octokit::NotFound)
+
+      notes = publisher.send(:generate_release_notes)
+
+      expect(notes).to include("### What's new")
+      expect(notes).to include('- Initial release')
     end
   end
 end
