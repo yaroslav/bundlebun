@@ -26,12 +26,12 @@ RSpec.describe 'rake bun' do
     end
 
     it 'executes bun with command string' do
-      expect(Kernel).to receive(:exec).with("#{binary_path} install package")
+      expect(Kernel).to receive(:exec).with(binary_path, 'install', 'package')
       Rake::Task[task_name].invoke('install package')
     end
 
     it 'handles command with quotes' do
-      expect(Kernel).to receive(:exec).with(%{#{binary_path} -e 'console.log(2+2)'})
+      expect(Kernel).to receive(:exec).with(binary_path, '-e', 'console.log(2+2)')
       Rake::Task[task_name].invoke("-e 'console.log(2+2)'")
     end
   end

@@ -242,7 +242,7 @@ namespace :bun do
     print "Apply these changes? [Y/n] "
     answer = $stdin.gets&.strip&.downcase
 
-    if answer.empty? || answer == 'y' || answer == 'yes'
+    if answer.nil? || answer.empty? || answer == 'y' || answer == 'yes'
       changes.each do |change|
         package['scripts'][change[:name]] = change[:new]
       end
@@ -294,7 +294,7 @@ namespace :bun do
       print "Apply these changes? [Y/n] "
       answer = $stdin.gets&.strip&.downcase
 
-      if answer.empty? || answer == 'y' || answer == 'yes'
+      if answer.nil? || answer.empty? || answer == 'y' || answer == 'yes'
         File.write(procfile, new_content)
         puts "Updated #{procfile} successfully.\n\n"
       else

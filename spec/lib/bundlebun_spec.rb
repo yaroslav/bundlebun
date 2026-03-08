@@ -14,18 +14,18 @@ RSpec.describe Bundlebun do
 
     it 'replaces the process with bun' do
       arguments = 'install package_name'
-      expect(Kernel).to receive(:exec).with("#{binary_path} #{arguments}")
+      expect(Kernel).to receive(:exec).with(binary_path, 'install', 'package_name')
 
       Bundlebun.call(arguments)
     end
 
     it 'works with the .() shorthand syntax' do
-      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      expect(Kernel).to receive(:exec).with(binary_path, '--version')
       Bundlebun.('--version') # rubocop:disable Style/LambdaCall
     end
 
     it 'works with array arguments' do
-      expect(Kernel).to receive(:exec).with("#{binary_path} add postcss")
+      expect(Kernel).to receive(:exec).with(binary_path, 'add', 'postcss')
       Bundlebun.call(['add', 'postcss'])
     end
   end
@@ -37,13 +37,13 @@ RSpec.describe Bundlebun do
 
     it 'replaces the process with bun' do
       arguments = 'run dev'
-      expect(Kernel).to receive(:exec).with("#{binary_path} #{arguments}")
+      expect(Kernel).to receive(:exec).with(binary_path, 'run', 'dev')
 
       Bundlebun.exec(arguments)
     end
 
     it 'works with array arguments' do
-      expect(Kernel).to receive(:exec).with("#{binary_path} x --bun vite")
+      expect(Kernel).to receive(:exec).with(binary_path, 'x', '--bun', 'vite')
 
       Bundlebun.exec(['x', '--bun', 'vite'])
     end
@@ -56,18 +56,18 @@ RSpec.describe Bundlebun do
 
     it 'runs bun as subprocess and returns result' do
       arguments = 'install package_name'
-      expect(Kernel).to receive(:system).with("#{binary_path} #{arguments}").and_return(true)
+      expect(Kernel).to receive(:system).with(binary_path, 'install', 'package_name').and_return(true)
 
       expect(Bundlebun.system(arguments)).to be true
     end
 
     it 'returns false when bun exits with error' do
-      expect(Kernel).to receive(:system).and_return(false)
+      expect(Kernel).to receive(:system).with(binary_path, 'invalid').and_return(false)
       expect(Bundlebun.system('invalid')).to be false
     end
 
     it 'returns nil when execution fails' do
-      expect(Kernel).to receive(:system).and_return(nil)
+      expect(Kernel).to receive(:system).with(binary_path, 'test').and_return(nil)
       expect(Bundlebun.system('test')).to be_nil
     end
   end

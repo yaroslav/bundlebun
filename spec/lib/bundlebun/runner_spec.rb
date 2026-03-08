@@ -190,13 +190,13 @@ RSpec.describe Bundlebun::Runner do
 
     it 'replaces process with bun using string arguments' do
       runner = described_class.new('install --no-save')
-      expect(Kernel).to receive(:exec).with("#{binary_path} install --no-save")
+      expect(Kernel).to receive(:exec).with(binary_path, 'install', '--no-save')
       runner.exec
     end
 
     it 'replaces process with bun using array arguments' do
       runner = described_class.new(['install', '--no-save'])
-      expect(Kernel).to receive(:exec).with("#{binary_path} install --no-save")
+      expect(Kernel).to receive(:exec).with(binary_path, 'install', '--no-save')
       runner.exec
     end
 
@@ -224,7 +224,7 @@ RSpec.describe Bundlebun::Runner do
 
     it 'is an alias for #exec' do
       runner = described_class.new('--version')
-      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      expect(Kernel).to receive(:exec).with(binary_path, '--version')
       runner.call
     end
   end
@@ -236,13 +236,13 @@ RSpec.describe Bundlebun::Runner do
 
     it 'runs bun as a subprocess with string arguments' do
       runner = described_class.new('install --no-save')
-      expect(Kernel).to receive(:system).with("#{binary_path} install --no-save").and_return(true)
+      expect(Kernel).to receive(:system).with(binary_path, 'install', '--no-save').and_return(true)
       expect(runner.system).to be true
     end
 
     it 'runs bun as a subprocess with array arguments' do
       runner = described_class.new(['install', '--no-save'])
-      expect(Kernel).to receive(:system).with("#{binary_path} install --no-save").and_return(true)
+      expect(Kernel).to receive(:system).with(binary_path, 'install', '--no-save').and_return(true)
       expect(runner.system).to be true
     end
 
@@ -254,14 +254,24 @@ RSpec.describe Bundlebun::Runner do
 
     it 'returns false when bun exits with error' do
       runner = described_class.new('invalid-command')
-      expect(Kernel).to receive(:system).and_return(false)
+      expect(Kernel).to receive(:system).with(binary_path, 'invalid-command').and_return(false)
       expect(runner.system).to be false
     end
 
     it 'returns nil when execution fails' do
       runner = described_class.new('test')
-      expect(Kernel).to receive(:system).and_return(nil)
+      expect(Kernel).to receive(:system).with(binary_path, 'test').and_return(nil)
       expect(runner.system).to be_nil
+    end
+
+    it 'preserves argument boundaries when array arguments contain spaces' do
+      runner = described_class.new(['hello world', 'plain'])
+
+      expect(Kernel).to receive(:system)
+        .with(binary_path, 'hello world', 'plain')
+        .and_return(true)
+
+      expect(runner.system).to be true
     end
 
     it 'exits with code 127 if bun executable does not exist' do
@@ -281,7 +291,7 @@ RSpec.describe Bundlebun::Runner do
     end
 
     it 'creates a runner and calls exec' do
-      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      expect(Kernel).to receive(:exec).with(binary_path, '--version')
       described_class.exec('--version')
     end
   end
@@ -292,7 +302,7 @@ RSpec.describe Bundlebun::Runner do
     end
 
     it 'is an alias for .exec' do
-      expect(Kernel).to receive(:exec).with("#{binary_path} --version")
+      expect(Kernel).to receive(:exec).with(binary_path, '--version')
       described_class.call('--version')
     end
   end
@@ -303,7 +313,7 @@ RSpec.describe Bundlebun::Runner do
     end
 
     it 'creates a runner and calls system' do
-      expect(Kernel).to receive(:system).with("#{binary_path} --version").and_return(true)
+      expect(Kernel).to receive(:system).with(binary_path, '--version').and_return(true)
       expect(described_class.system('--version')).to be true
     end
   end

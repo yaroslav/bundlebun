@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'shellwords'
+
 module Bundlebun
   # {Runner} is the class that bundlebun uses to run the bundled Bun executable.
   #
@@ -194,7 +196,7 @@ module Bundlebun
     def exec
       check_executable!
       instrument('exec.bundlebun')
-      Kernel.exec(command)
+      Kernel.exec(*command)
     end
 
     # Replaces the current Ruby process with Bun. Alias for {#exec}.
@@ -228,7 +230,7 @@ module Bundlebun
     def system
       check_executable!
       instrument('system.bundlebun') do
-        Kernel.system(command)
+        Kernel.system(*command)
       end
     end
 
@@ -255,7 +257,18 @@ module Bundlebun
     end
 
     def command
-      [self.class.binary_path, *arguments].join(' ').strip
+      [self.class.binary_path, *command_arguments]
+    end
+
+    def command_arguments
+      case arguments
+      when Array
+        arguments.flatten.compact.map(&:to_s)
+      when nil
+        []
+      else
+        Shellwords.split(arguments.to_s)
+      end
     end
   end
 end
