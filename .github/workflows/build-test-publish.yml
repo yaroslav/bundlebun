@@ -52,7 +52,7 @@ jobs:
           gem install --verbose /gems/\$(grep x86_64-linux ../built_gems.txt) --no-document && \
           bundle install && \
           bundle exec rake bun:install && \
-          output=\$(./bin/bun -e 'console.log\(2+2\)') && \
+          output=\$(./bin/bun -e 'console.log(2+2)') && \
           stripped_output=\$(echo \"\$output\" | tr -d '\\n\\r') && \
           if [ \"\$stripped_output\" != \"4\" ]; then \
             echo \"Expected output '4', got '\$stripped_output'\" && \
@@ -82,7 +82,7 @@ jobs:
           gem install --verbose /gems/\$(grep aarch64-linux ../built_gems.txt) --no-document && \
           bundle install && \
           bundle exec rake bun:install && \
-          output=\$(./bin/bun -e 'console.log\(2+2\)') && \
+          output=\$(./bin/bun -e 'console.log(2+2)') && \
           stripped_output=\$(echo \"\$output\" | tr -d '\\n\\r') && \
           if [ \"\$stripped_output\" != \"4\" ]; then \
             echo \"Expected output '4', got '\$stripped_output'\" && \
@@ -111,7 +111,7 @@ jobs:
           gem install --verbose ../$(grep arm64-darwin ../built_gems.txt) --no-document && \
           bundle install && \
           bundle exec rake bun:install && \
-          output=$(./bin/bun -e 'console.log\(2+2\)') && \
+          output=$(./bin/bun -e 'console.log(2+2)') && \
           stripped_output=$(echo "$output" | tr -d '\n\r') && \
           if [ "$stripped_output" != "4" ]; then \
             echo "Expected output '4', got '$stripped_output'" && \
@@ -140,7 +140,7 @@ jobs:
           gem install --verbose ../$(grep x86_64-darwin ../built_gems.txt) --no-document && \
           bundle install && \
           bundle exec rake bun:install && \
-          output=$(./bin/bun -e 'console.log\(2+2\)') && \
+          output=$(./bin/bun -e 'console.log(2+2)') && \
           stripped_output=$(echo "$output" | tr -d '\n\r') && \
           if [ "$stripped_output" != "4" ]; then \
             echo "Expected output '4', got '$stripped_output'" && \
