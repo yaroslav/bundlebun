@@ -323,6 +323,7 @@ RSpec.describe 'rake bun:install' do
 
   describe 'bun:install:package' do
     let(:package_json_path) { 'package.json' }
+    let(:binstub_path) { Bundlebun::Runner.binstub_path }
     let(:package_json) do
       JSON.generate({
         'scripts' => {
@@ -343,7 +344,7 @@ RSpec.describe 'rake bun:install' do
         package_json_path,
         JSON.pretty_generate({
           'scripts' => {
-            'build' => 'bin/bun build'
+            'build' => "#{binstub_path} build"
           }
         }) + "\n"
       )
@@ -353,6 +354,7 @@ RSpec.describe 'rake bun:install' do
   end
 
   describe 'bun:install:procfile' do
+    let(:binstub_path) { Bundlebun::Runner.binstub_path }
     let(:procfile_path) { 'Procfile.dev' }
     let(:procfile_content) { "web: bun run dev\n" }
 
@@ -364,7 +366,7 @@ RSpec.describe 'rake bun:install' do
     end
 
     it 'applies default confirmation when stdin is not interactive' do
-      expect(File).to receive(:write).with(procfile_path, "web: bin/bun run dev\n")
+      expect(File).to receive(:write).with(procfile_path, "web: #{binstub_path} run dev\n")
 
       expect { Rake::Task['bun:install:procfile'].invoke }.not_to raise_error
     end
