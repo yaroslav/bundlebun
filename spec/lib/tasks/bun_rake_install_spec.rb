@@ -320,4 +320,57 @@ RSpec.describe 'rake bun:install' do
       end
     end
   end
+
+  describe 'bun:install:package' do
+    let(:package_json_path) { 'package.json' }
+    let(:binstub_path) { Bundlebun::Runner.binstub_path }
+    let(:package_json) do
+      JSON.generate({
+        'scripts' => {
+          'build' => 'bun build'
+        }
+      })
+    end
+
+    before do
+      allow(File).to receive(:exist?).with(package_json_path).and_return(true)
+      allow(File).to receive(:read).with(package_json_path).and_return(package_json)
+      allow($stdin).to receive(:gets).and_return(nil)
+      allow($stdout).to receive(:write)
+    end
+
+    it 'applies default confirmation when stdin is not interactive' do
+      expect($stdout).to receive(:write).with("Apply these changes? [Y/n] ")
+      expect(File).to receive(:write).with(
+        package_json_path,
+        JSON.pretty_generate({
+          'scripts' => {
+            'build' => "#{binstub_path} build"
+          }
+        }) + "\n"
+      )
+
+      expect { Rake::Task['bun:install:package'].invoke }.not_to raise_error
+    end
+  end
+
+  describe 'bun:install:procfile' do
+    let(:binstub_path) { Bundlebun::Runner.binstub_path }
+    let(:procfile_path) { 'Procfile.dev' }
+    let(:procfile_content) { "web: bun run dev\n" }
+
+    before do
+      allow(Dir).to receive(:glob).with('Procfile*').and_return([procfile_path])
+      allow(File).to receive(:read).with(procfile_path).and_return(procfile_content)
+      allow($stdin).to receive(:gets).and_return(nil)
+      allow($stdout).to receive(:write)
+    end
+
+    it 'applies default confirmation when stdin is not interactive' do
+      expect($stdout).to receive(:write).with("Apply these changes? [Y/n] ")
+      expect(File).to receive(:write).with(procfile_path, "web: #{binstub_path} run dev\n")
+
+      expect { Rake::Task['bun:install:procfile'].invoke }.not_to raise_error
+    end
+  end
 end

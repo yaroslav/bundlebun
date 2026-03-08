@@ -1,3 +1,8 @@
+## [Unreleased]
+
+- Bun is now executed with argv-safe `exec` / `system` calls instead of flattening arguments into a single string to preserve values with spaces correctly.
+- `rake bun:install:package` and `rake bun:install:procfile` no longer crash in non-interactive environments when stdin is closed.
+
 ## [0.4.0] - 2026-02-01
 
 - `Bundlebun.system(args)` method: runs Bun as a subprocess and returns to Ruby. Returns `true` if Bun exited successfully. Use this when you need to continue executing Ruby code after Bun finishes.
