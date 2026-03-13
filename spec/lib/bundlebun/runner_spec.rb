@@ -183,6 +183,12 @@ RSpec.describe Bundlebun::Runner do
     end
   end
 
+  describe '#initialize' do
+    it 'requires arguments' do
+      expect { described_class.new }.to raise_error(ArgumentError)
+    end
+  end
+
   describe '#exec' do
     before do
       allow(File).to receive(:exist?).with(binary_path).and_return(true)
@@ -197,12 +203,6 @@ RSpec.describe Bundlebun::Runner do
     it 'replaces process with bun using array arguments' do
       runner = described_class.new(['install', '--no-save'])
       expect(Kernel).to receive(:exec).with(binary_path, 'install', '--no-save')
-      runner.exec
-    end
-
-    it 'replaces process with bun without arguments' do
-      runner = described_class.new
-      expect(Kernel).to receive(:exec).with(binary_path)
       runner.exec
     end
 
@@ -243,12 +243,6 @@ RSpec.describe Bundlebun::Runner do
     it 'runs bun as a subprocess with array arguments' do
       runner = described_class.new(['install', '--no-save'])
       expect(Kernel).to receive(:system).with(binary_path, 'install', '--no-save').and_return(true)
-      expect(runner.system).to be true
-    end
-
-    it 'runs bun without arguments' do
-      runner = described_class.new
-      expect(Kernel).to receive(:system).with(binary_path).and_return(true)
       expect(runner.system).to be true
     end
 

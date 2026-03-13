@@ -1,3 +1,7 @@
+## [Unreleased]
+
+- It makes no sense to run Bun without arguments, so no-argument `Bundlebun.call` / `exec` / `system` calls now raise `ArgumentError`.
+
 ## [0.4.1] - 2026-03-08
 
 - Bun is now executed with argv-safe `exec` / `system` calls instead of flattening arguments into a single string to preserve values with spaces correctly.

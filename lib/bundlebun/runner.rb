@@ -175,7 +175,7 @@ module Bundlebun
     #
     # @see #system
     # @see #exec
-    def initialize(arguments = '')
+    def initialize(arguments)
       @arguments = arguments
     end
 

@@ -21,7 +21,7 @@ module Bundlebun
     def self.binstub_or_binary_path: () -> String
     def self.binstub_exist?: () -> bool
 
-    def initialize: (?String | Array[String] arguments) -> void
+    def initialize: (String | Array[String] arguments) -> void
 
     # Replaces the current Ruby process with Bun. Never returns.
     def exec: () -> bot
