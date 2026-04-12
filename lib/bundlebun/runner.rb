@@ -99,7 +99,9 @@ module Bundlebun
       #
       # @return [String]
       def binstub_path
-        Bundlebun::Platform.windows? ? "#{BINSTUB_PATH}.cmd" : BINSTUB_PATH
+        return @binstub_path if defined?(@binstub_path)
+
+        @binstub_path = Bundlebun::Platform.windows? ? "#{BINSTUB_PATH}.cmd" : BINSTUB_PATH
       end
 
       # A full path to binstub that bundlebun usually generates with installation Rake tasks.
@@ -108,7 +110,9 @@ module Bundlebun
       #
       # @return [String]
       def full_binstub_path
-        File.expand_path(binstub_path)
+        return @full_binstub_path if defined?(@full_binstub_path)
+
+        @full_binstub_path = File.expand_path(binstub_path)
       end
 
       # A relative directory path to the bundled Bun executable from the root of the gem.

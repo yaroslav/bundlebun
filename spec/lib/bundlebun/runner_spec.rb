@@ -94,11 +94,15 @@ RSpec.describe Bundlebun::Runner do
           })
           Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
           described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+          described_class.remove_instance_variable(:@binstub_path) if described_class.instance_variable_defined?(:@binstub_path)
+          described_class.remove_instance_variable(:@full_binstub_path) if described_class.instance_variable_defined?(:@full_binstub_path)
         end
 
         after do
           Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
           described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+          described_class.remove_instance_variable(:@binstub_path) if described_class.instance_variable_defined?(:@binstub_path)
+          described_class.remove_instance_variable(:@full_binstub_path) if described_class.instance_variable_defined?(:@full_binstub_path)
         end
 
         it 'returns the binstub path as-is on Windows' do
@@ -114,11 +118,15 @@ RSpec.describe Bundlebun::Runner do
           })
           Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
           described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+          described_class.remove_instance_variable(:@binstub_path) if described_class.instance_variable_defined?(:@binstub_path)
+          described_class.remove_instance_variable(:@full_binstub_path) if described_class.instance_variable_defined?(:@full_binstub_path)
         end
 
         after do
           Bundlebun::Platform.remove_instance_variable(:@windows) if Bundlebun::Platform.instance_variable_defined?(:@windows)
           described_class.remove_instance_variable(:@binary_path) if described_class.instance_variable_defined?(:@binary_path)
+          described_class.remove_instance_variable(:@binstub_path) if described_class.instance_variable_defined?(:@binstub_path)
+          described_class.remove_instance_variable(:@full_binstub_path) if described_class.instance_variable_defined?(:@full_binstub_path)
         end
 
         it 'returns the binstub path as-is on Unix-like systems' do
