@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bundlebun (0.4.1)
+    bundlebun (0.4.2)
       json (~> 2.0)
       zeitwerk (~> 2.5)
 
@@ -305,7 +305,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    yard (0.9.38)
+    yard (0.9.39)
     zeitwerk (2.7.5)
 
 PLATFORMS
