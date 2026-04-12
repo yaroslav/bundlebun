@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.4.2] - 2026-04-12
 
 - It makes no sense to run Bun without arguments, so no-argument `Bundlebun.call` / `exec` / `system` calls now raise `ArgumentError`.
 - `Bundlebun::Runner.binstub_path` and `full_binstub_path` are now memoized, matching the existing pattern used by `binary_path` and `full_directory`. Avoids redundant string and `File.expand_path` work on every integration command build.
