@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bundlebun (0.5.0)
+    bundlebun (0.4.2)
       json (~> 2.0)
       zeitwerk (~> 2.5)
 

@@ -19,8 +19,6 @@ module BuildHelpers
       bun_platform = PlatformManager.bun_platform_for(platform)
       binary_name = PlatformManager.binary_name_for(platform)
 
-      puts "Downloading Bun #{@version} for #{platform} (#{bun_platform || "unmapped"})"
-
       binary_path = File.join(destination_dir, binary_name)
 
       unless File.exist?(binary_path)
