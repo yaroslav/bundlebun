@@ -188,6 +188,10 @@ jobs:
         test-windows,
       ]
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -199,8 +203,8 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: gems
+      - uses: rubygems/configure-rubygems-credentials@main
       - name: Publish to GitHub Releases and RubyGems
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
         run: bundle exec rake bundlebun:publish

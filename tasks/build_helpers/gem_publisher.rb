@@ -12,7 +12,6 @@ module BuildHelpers
     end
 
     def publish
-      validate_environment!
       validate_gems_exist!
 
       create_github_release
@@ -20,12 +19,6 @@ module BuildHelpers
     end
 
     private
-
-    def validate_environment!
-      return if ENV['GEM_HOST_API_KEY']
-
-      raise PublishError, 'GEM_HOST_API_KEY not provided'
-    end
 
     def validate_gems_exist!
       return if File.exist?('built_gems.txt') && !gem_files.empty?
@@ -129,11 +122,8 @@ module BuildHelpers
     end
 
     def publish_to_rubygems
-      api_key = ENV['GEM_HOST_API_KEY']
-      raise PublishError, "GEM_HOST_API_KEY environment variable is not set" if api_key.nil? || api_key.empty?
-
       gem_files.each do |gem_file|
-        system("gem push --key #{api_key} #{gem_file}", exception: true)
+        system("gem push #{gem_file}", exception: true)
       end
     rescue => e
       raise PublishError, "Failed to publish to RubyGems: #{e.message}"

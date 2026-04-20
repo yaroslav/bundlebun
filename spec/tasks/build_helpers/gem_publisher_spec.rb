@@ -23,12 +23,6 @@ RSpec.describe BuildHelpers::GemPublisher do
     allow(File).to receive(:readlines)
       .with('built_gems.txt')
       .and_return(gem_files)
-
-    ENV['GEM_HOST_API_KEY'] = 'fake_rubygems_key'
-  end
-
-  after do
-    ENV.delete('GEM_HOST_API_KEY')
   end
 
   context 'when all validations pass' do
@@ -72,21 +66,13 @@ RSpec.describe BuildHelpers::GemPublisher do
     it 'publishes gems to RubyGems' do
       gem_files.each do |gem_file|
         expect(publisher).to receive(:system)
-          .with("gem push --key fake_rubygems_key #{gem_file}", exception: true)
+          .with("gem push #{gem_file}", exception: true)
       end
       publisher.publish
     end
   end
 
   context 'when validations fail' do
-    it 'raises error when RubyGems API key is missing' do
-      ENV.delete('GEM_HOST_API_KEY')
-      expect { publisher.publish }.to raise_error(
-        BuildHelpers::GemPublisher::PublishError,
-        'GEM_HOST_API_KEY not provided'
-      )
-    end
-
     it 'raises error when built_gems.txt is missing' do
       allow(File).to receive(:exist?)
         .with('built_gems.txt')
