@@ -1,3 +1,7 @@
+## [0.5.0] - 2026-04-15
+
+- Now including Bun builds for `-musl` Linux variants (https://github.com/yaroslav/bundlebun/issues/16).
+
 ## [0.4.2] - 2026-04-12
 
 - It makes no sense to run Bun without arguments, so no-argument `Bundlebun.call` / `exec` / `system` calls now raise `ArgumentError`.
