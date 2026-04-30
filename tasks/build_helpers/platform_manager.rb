@@ -3,13 +3,14 @@
 module BuildHelpers
   class PlatformManager
     # RubyGems => Bun platforms.
-    # Order matters: musl variants must come before their bare-linux
-    # counterparts so #bun_platform_for picks the most specific match first.
+    # Linux variants are explicit about libc (-gnu/-musl); Gem::Platform
+    # treats bare `x86_64-linux` and `x86_64-linux-gnu` as equivalent, so
+    # users with bare-libc lockfile entries still resolve to the gnu gem.
     PLATFORM_MAPPING = {
       'x86_64-linux-musl' => 'linux-x64-musl',
-      'x86_64-linux' => 'linux-x64',
+      'x86_64-linux-gnu' => 'linux-x64',
       'aarch64-linux-musl' => 'linux-aarch64-musl',
-      'aarch64-linux' => 'linux-aarch64',
+      'aarch64-linux-gnu' => 'linux-aarch64',
       'arm64-darwin' => 'darwin-aarch64',
       'x86_64-darwin' => 'darwin-x64',
       'x64-mingw-ucrt' => 'windows-x64'

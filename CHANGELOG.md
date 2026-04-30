@@ -1,6 +1,8 @@
-## [0.5.0] - 2026-04-15
+## [0.5.0] - 2026-04-30
 
-- Now including Bun builds for `-musl` Linux variants (https://github.com/yaroslav/bundlebun/issues/16).
+- Now including Bun builds for `linux-musl` Linux variants [#16].
+- Existing Linux variants are now labeled as `linux-gnu`
+- No code changes.
 
 ## [0.4.2] - 2026-04-12
 
