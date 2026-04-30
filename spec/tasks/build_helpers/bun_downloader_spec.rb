@@ -24,6 +24,9 @@ RSpec.describe BuildHelpers::BunDownloader do
     allow(zip_entry).to receive(:extract)
     allow(FileUtils).to receive(:mkdir_p)
     allow(FileUtils).to receive(:chmod)
+
+    # Suppress logging output ("Downloading Bun ... for ...") in tests.
+    allow_any_instance_of(described_class).to receive(:puts)
   end
 
   describe 'when downloading for current platform' do

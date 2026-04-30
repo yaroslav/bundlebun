@@ -12,14 +12,15 @@ RSpec.describe BuildHelpers::GemBuilder do
   let(:platform_gemspec) { instance_double(Gem::Specification) }
   let(:downloader) { instance_double(BuildHelpers::BunDownloader) }
   let(:builder) { described_class.new(gemspec) }
-  let(:test_binary_path) { 'tmp/test_vendor/bun/bun' }
+  let(:sandbox_binary_path) do
+    ->(platform) { File.join("tmp/build_#{platform}", Bundlebun::Runner.relative_directory, 'bun') }
+  end
 
   before do
     # Quiet the output
     allow(builder).to receive(:puts)
     allow(builder).to receive(:warn)
 
-    # Stub basic operations
     stub_basic_operations
     stub_gemspec_behavior
     stub_downloader
@@ -29,8 +30,8 @@ RSpec.describe BuildHelpers::GemBuilder do
     it 'builds a gem for each supported platform' do
       BuildHelpers::PlatformManager::PLATFORM_MAPPING.each_key do |platform|
         expect(downloader).to receive(:download_for)
-          .with(platform)
-          .and_return(test_binary_path)
+          .with(platform, destination_dir: File.join("tmp/build_#{platform}", Bundlebun::Runner.relative_directory))
+          .and_return(sandbox_binary_path.call(platform))
       end
 
       built_gems = builder.build_for_all_platforms
@@ -38,17 +39,29 @@ RSpec.describe BuildHelpers::GemBuilder do
       expect(built_gems.length).to eq(BuildHelpers::PlatformManager::PLATFORM_MAPPING.length)
     end
 
-    it 'cleans up after itself' do
+    it 'cleans up its sandbox directory after each platform' do
       BuildHelpers::PlatformManager::PLATFORM_MAPPING.each_key do |platform|
         allow(downloader).to receive(:download_for)
-          .with(platform)
-          .and_return(test_binary_path)
+          .with(platform, destination_dir: anything)
+          .and_return(sandbox_binary_path.call(platform))
       end
 
       builder.build_for_all_platforms
       BuildHelpers::PlatformManager::PLATFORM_MAPPING.each_key do |platform|
-        expect(FileUtils).to have_received(:rm_rf).with("tmp/build_#{platform}")
+        expect(FileUtils).to have_received(:rm_rf).with("tmp/build_#{platform}").at_least(:once)
       end
+    end
+
+    it 'never writes to the host vendor directory' do
+      BuildHelpers::PlatformManager::PLATFORM_MAPPING.each_key do |platform|
+        allow(downloader).to receive(:download_for)
+          .with(platform, destination_dir: anything)
+          .and_return(sandbox_binary_path.call(platform))
+      end
+
+      builder.build_for_all_platforms
+      vendor = Bundlebun::Runner.relative_directory
+      expect(downloader).not_to have_received(:download_for).with(anything, destination_dir: vendor)
     end
   end
 
@@ -57,17 +70,17 @@ RSpec.describe BuildHelpers::GemBuilder do
       before do
         BuildHelpers::PlatformManager::PLATFORM_MAPPING.each_key do |platform|
           allow(downloader).to receive(:download_for)
-            .with(platform)
+            .with(platform, destination_dir: anything)
             .and_return(nil)
         end
         allow(downloader).to receive(:download_for)
-          .with('x86_64-linux')
+          .with('x86_64-linux-gnu', destination_dir: anything)
           .and_raise(Down::NotFound.new('Not found'))
       end
 
       it 'includes failed platform in error message' do
         expect { builder.build_for_all_platforms }
-          .to raise_error(BuildHelpers::GemBuilder::BuildError, /x86_64-linux/)
+          .to raise_error(BuildHelpers::GemBuilder::BuildError, /x86_64-linux-gnu/)
       end
     end
 
@@ -89,19 +102,14 @@ RSpec.describe BuildHelpers::GemBuilder do
   private
 
   def stub_basic_operations
-    # File operations
     allow(FileUtils).to receive(:mkdir_p)
     allow(FileUtils).to receive(:rm_rf)
     allow(FileUtils).to receive(:rm_f)
     allow(FileUtils).to receive(:cp)
-
-    # Ensure file operations are safe
-    allow(File).to receive(:join) do |*paths|
-      paths.join('/').sub(%r{^vendor/bun}, 'tmp/test_vendor/bun')
-    end
-
+    allow(FileUtils).to receive(:mv)
     allow(File).to receive(:exist?).and_return(true)
-    allow(File).to receive(:basename).and_return('bun')
+    # Run the sandbox build block in-place; we don't actually chdir.
+    allow(Dir).to receive(:chdir).and_yield
   end
 
   def stub_gemspec_behavior

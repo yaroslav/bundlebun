@@ -23,13 +23,11 @@ module BuildHelpers
 
       binary_path = File.join(destination_dir, binary_name)
 
-      # Always re-download: the binary path is shared across platforms during
-      # multi-platform builds, so a leftover from a previous platform must not
-      # be silently reused.
-      FileUtils.rm_f(binary_path)
-      FileUtils.mkdir_p(destination_dir)
-      download_and_extract(bun_platform, binary_path)
-      FileUtils.chmod(0o755, binary_path)
+      unless File.exist?(binary_path)
+        FileUtils.mkdir_p(destination_dir)
+        download_and_extract(bun_platform, binary_path)
+        FileUtils.chmod(0o755, binary_path)
+      end
 
       binary_path
     end
