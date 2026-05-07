@@ -36,6 +36,10 @@ bin/bun --version
 
 ## Rationale
 
+**See the introductory post for background and motivation**:
+
+**[Bundlebun bundles Bun, and a tour of asset pipelines and JavaScript runtimes Rails has been through](https://yaroslav.io/posts/bundlebun-bundles-bun)**
+
 **Modern frontend setup is needlessly complex** and may involve a lot of maintenance. Developers need _at the very least_ a JavaScript runtime (typically, Node.js), a package manager (could be npm, yarn, or pnpm), and a build tool (Vite, Webpack, esbuild, Parcel—dozens of them).
 
 - One way forward is to dockerize development environments, creating unnecessary headaches for the development team—both frontend and backend engineers (especially if the team is not that large and the project is not that complex).
