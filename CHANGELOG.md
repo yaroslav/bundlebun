@@ -1,3 +1,7 @@
+## [Unreleased]
+
+- Bun binaries are now verified against the SHA256 checksums Bun publishes in `SHASUMS256.txt` while building the platform gems. A missing or mismatched checksum aborts the build, so a tampered or corrupted binary is never packaged into a released gem.
+
 ## [0.5.0] - 2026-04-30
 
 - Now including Bun builds for `linux-musl` Linux variants [#16].

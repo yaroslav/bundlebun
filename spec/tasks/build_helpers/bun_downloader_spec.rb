@@ -10,6 +10,16 @@ RSpec.describe BuildHelpers::BunDownloader do
   let(:zip_entry) { instance_double(Zip::Entry, name: 'bun') }
   let(:zip_file) { instance_double(Zip::File) }
   let(:temp_file) { instance_double(Tempfile, path: '/tmp/fake.zip', unlink: true) }
+  let(:shasums_file) { instance_double(Tempfile, path: '/tmp/SHASUMS256.txt', unlink: true) }
+
+  # A valid checksum for every platform we know how to build, so any platform
+  # under test verifies successfully unless a test overrides the actual digest.
+  let(:valid_checksum) { 'a' * 64 }
+  let(:shasums_content) do
+    BuildHelpers::PlatformManager::PLATFORM_MAPPING.values
+      .map { |bun_platform| "#{valid_checksum}  bun-#{bun_platform}.zip" }
+      .join("\n") + "\n"
+  end
 
   before do
     allow(BuildHelpers).to receive(:github_client).and_return(github_client)
@@ -18,7 +28,16 @@ RSpec.describe BuildHelpers::BunDownloader do
     # Pretend the file does not exist and just continue with the download
     allow(File).to receive(:exist?).and_return(false)
 
-    allow(Down).to receive(:download).and_return(temp_file)
+    # Route the SHASUMS256.txt request to its own tempfile; every other download
+    # is the platform zip. Stub the digest of that zip to the published value so
+    # verification passes by default.
+    allow(Down).to receive(:download) do |url|
+      url.end_with?('SHASUMS256.txt') ? shasums_file : temp_file
+    end
+    allow(File).to receive(:read).with(shasums_file.path).and_return(shasums_content)
+    allow(Digest::SHA256).to receive(:file).with(temp_file.path)
+      .and_return(instance_double(Digest::SHA256, hexdigest: valid_checksum))
+
     allow(Zip::File).to receive(:open).and_yield(zip_file)
     allow(zip_file).to receive(:find).and_return(zip_entry)
     allow(zip_entry).to receive(:extract)
@@ -76,6 +95,54 @@ RSpec.describe BuildHelpers::BunDownloader do
       expect(Down).to have_received(:download)
         .with("https://github.com/#{BuildHelpers::BUN_REPO}/releases/download/bun-v1.0.0/bun-windows-x64.zip")
       expect(binary_path).to eq('lib/bundlebun/vendor/bun/bun.exe')
+    end
+  end
+
+  describe 'checksum verification' do
+    let(:downloader) { described_class.new('1.0.0') }
+    let(:checksum_url) { "https://github.com/#{BuildHelpers::BUN_REPO}/releases/download/bun-v1.0.0/SHASUMS256.txt" }
+
+    it 'downloads SHASUMS256.txt for the release' do
+      downloader.download_for('x86_64-linux')
+      expect(Down).to have_received(:download).with(checksum_url)
+    end
+
+    it 'extracts the binary when the checksum matches' do
+      downloader.download_for('x86_64-linux')
+      expect(zip_entry).to have_received(:extract)
+    end
+
+    it 'aborts with ChecksumError when the archive digest does not match' do
+      allow(Digest::SHA256).to receive(:file).with(temp_file.path)
+        .and_return(instance_double(Digest::SHA256, hexdigest: 'b' * 64))
+
+      expect { downloader.download_for('x86_64-linux') }
+        .to raise_error(described_class::ChecksumError, /mismatch/i)
+    end
+
+    it 'does not extract the binary when verification fails' do
+      allow(Digest::SHA256).to receive(:file).with(temp_file.path)
+        .and_return(instance_double(Digest::SHA256, hexdigest: 'b' * 64))
+
+      expect { downloader.download_for('x86_64-linux') }.to raise_error(described_class::ChecksumError)
+      expect(zip_entry).not_to have_received(:extract)
+    end
+
+    it 'aborts when no checksum is published for the file' do
+      allow(File).to receive(:read).with(shasums_file.path)
+        .and_return("#{"c" * 64}  bun-some-other-platform.zip\n")
+
+      expect { downloader.download_for('x86_64-linux') }
+        .to raise_error(described_class::ChecksumError, /no sha256 published/i)
+    end
+
+    it 'matches checksums case-insensitively' do
+      allow(File).to receive(:read).with(shasums_file.path)
+        .and_return("#{"A" * 64}  bun-linux-x64.zip\n")
+      allow(Digest::SHA256).to receive(:file).with(temp_file.path)
+        .and_return(instance_double(Digest::SHA256, hexdigest: 'a' * 64))
+
+      expect { downloader.download_for('x86_64-linux') }.not_to raise_error
     end
   end
 
