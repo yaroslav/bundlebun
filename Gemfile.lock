@@ -3,7 +3,6 @@ PATH
   specs:
     bundlebun (0.5.0)
       json (~> 2.0)
-      zeitwerk (~> 2.5)
 
 GEM
   remote: https://rubygems.org/

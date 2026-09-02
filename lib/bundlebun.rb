@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
-require 'zeitwerk'
+require_relative 'bundlebun/version'
+require_relative 'bundlebun/platform'
+require_relative 'bundlebun/env_path'
+require_relative 'bundlebun/runner'
+require_relative 'bundlebun/integrations'
+require_relative 'bundlebun/integrations/cssbundling'
+require_relative 'bundlebun/integrations/execjs'
+require_relative 'bundlebun/integrations/jsbundling'
+require_relative 'bundlebun/integrations/vite_ruby'
 
 # bundlebun bundles [Bun](https://bun.sh), a fast JavaScript runtime, package manager
 # and builder, with your Ruby and Rails applications.
@@ -87,18 +95,6 @@ module Bundlebun
       Runner.system(...)
     end
 
-    def loader # @private
-      @loader ||= Zeitwerk::Loader.for_gem.tap do |loader|
-        loader.ignore("#{__dir__}/tasks")
-        loader.ignore("#{__dir__}/bundlebun/vendor")
-        loader.ignore("#{__dir__}/templates")
-
-        loader.inflector.inflect('execjs' => 'ExecJS')
-
-        loader.setup
-      end
-    end
-
     # Prepend the path to the bundled Bun executable to `PATH`.
     #
     # @see Bundlebun::Runner.full_directory
@@ -124,7 +120,6 @@ module Bundlebun
   end
 end
 
-Bundlebun.loader
 Bundlebun.prepend_to_path
 Bundlebun.load_tasks if defined?(Rake)
 Bundlebun.load_integrations
