@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bundlebun (0.5.0)
+    bundlebun (0.5.1)
       json (~> 2.0)
 
 GEM

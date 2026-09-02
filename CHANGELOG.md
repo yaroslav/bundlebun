@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.5.1] - 2026-09-02
 
 - bundlebun is now Ractor-ready.
 - Zeitwerk is no longer a dependency.
