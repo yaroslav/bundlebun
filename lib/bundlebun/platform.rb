@@ -11,8 +11,8 @@ module Bundlebun
       def windows?
         return @windows if defined?(@windows)
 
-        @windows = defined?(RbConfig) && defined?(RbConfig::CONFIG) &&
-          RbConfig::CONFIG['host_os'].match?(/mswin|mingw|cygwin/)
+        @windows = (defined?(RbConfig) && defined?(RbConfig::CONFIG) &&
+          RbConfig::CONFIG['host_os'].match?(/mswin|mingw|cygwin/)).freeze
       end
     end
   end

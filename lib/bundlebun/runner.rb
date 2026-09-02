@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'shellwords'
+require_relative 'platform'
 
 module Bundlebun
   # {Runner} is the class that bundlebun uses to run the bundled Bun executable.
@@ -101,7 +102,7 @@ module Bundlebun
       def binstub_path
         return @binstub_path if defined?(@binstub_path)
 
-        @binstub_path = Bundlebun::Platform.windows? ? "#{BINSTUB_PATH}.cmd" : BINSTUB_PATH
+        @binstub_path = (Bundlebun::Platform.windows? ? "#{BINSTUB_PATH}.cmd" : BINSTUB_PATH).freeze
       end
 
       # A full path to binstub that bundlebun usually generates with installation Rake tasks.
@@ -112,7 +113,7 @@ module Bundlebun
       def full_binstub_path
         return @full_binstub_path if defined?(@full_binstub_path)
 
-        @full_binstub_path = File.expand_path(binstub_path)
+        @full_binstub_path = File.expand_path(binstub_path).freeze
       end
 
       # A relative directory path to the bundled Bun executable from the root of the gem.
@@ -128,7 +129,7 @@ module Bundlebun
       def full_directory
         return @full_directory if defined?(@full_directory)
 
-        @full_directory = File.expand_path("../../#{relative_directory}", __dir__)
+        @full_directory = File.expand_path("../../#{relative_directory}", __dir__).freeze
       end
 
       # A full path to the bundled Bun binary we run
@@ -139,7 +140,7 @@ module Bundlebun
         return @binary_path if defined?(@binary_path)
 
         executable = "bun#{".exe" if Bundlebun::Platform.windows?}"
-        @binary_path = File.join(full_directory, executable)
+        @binary_path = File.join(full_directory, executable).freeze
       end
 
       # Does the bundled Bun binary exist?
@@ -157,6 +158,22 @@ module Bundlebun
       # @return [String]
       def binstub_or_binary_path
         binstub_exist? ? full_binstub_path : binary_path
+      end
+
+      # Makes the class-level state shareable between Ractors: computes and
+      # memoizes every path, and the platform check they depend on, as frozen
+      # values on the main Ractor.
+      #
+      # A non-main Ractor can read a frozen class-level memo, but it can never
+      # write one. So all of them have to be warm before any Ractor is spawned.
+      # This runs once, when the file is loaded, so you should not need to call it.
+      #
+      # @return [void]
+      def make_shareable
+        Bundlebun::Platform.windows?
+        binary_path
+        full_binstub_path
+        nil
       end
 
       # Does the binstub exist?
@@ -276,3 +293,5 @@ module Bundlebun
     end
   end
 end
+
+Bundlebun::Runner.make_shareable

@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- bundlebun is now Ractor-ready.
 - Zeitwerk is no longer a dependency.
 - Bun binaries are now verified against the SHA256 checksums Bun publishes in `SHASUMS256.txt` while building the platform gems. A missing or mismatched checksum aborts the build, so a tampered or corrupted binary is never packaged into a released gem.
 

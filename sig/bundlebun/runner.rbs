@@ -21,6 +21,9 @@ module Bundlebun
     def self.binstub_or_binary_path: () -> String
     def self.binstub_exist?: () -> bool
 
+    # Memoizes every path as frozen values on the main Ractor. Runs when the file is loaded.
+    def self.make_shareable: () -> void
+
     def initialize: (String | Array[String] arguments) -> void
 
     # Replaces the current Ruby process with Bun. Never returns.
