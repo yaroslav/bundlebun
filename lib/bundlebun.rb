@@ -104,7 +104,7 @@ module Bundlebun
 
     # Load included Rake tasks (like `bun:install`).
     def load_tasks
-      Dir[File.expand_path('tasks/*.rake', __dir__)].each { |task| load task }
+      Dir[File.expand_path('tasks/*.rake', __dir__)].each { |task| Rake.load_rakefile(task) }
     end
 
     # Detect and load all integrations (monkey-patches).
