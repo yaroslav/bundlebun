@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.5.2] - 2026-11-19
 
 - Works with json 3.x.
 
