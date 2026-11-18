@@ -1,3 +1,7 @@
+## [Unreleased]
+
+- Works with json 3.x.
+
 ## [0.5.1] - 2026-09-02
 
 - bundlebun is now Ractor-ready.
