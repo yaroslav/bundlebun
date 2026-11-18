@@ -16,7 +16,7 @@ gem 'jsbundling-rails'
 gem 'down'
 gem 'octokit'
 gem 'faraday-retry' # literally to shut up the warning.
-gem 'rubyzip', '~> 2.4.1'
+gem 'rubyzip', '~> 3.4.0'
 
 # Testing
 gem 'rspec'
